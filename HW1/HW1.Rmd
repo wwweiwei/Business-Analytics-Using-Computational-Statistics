@@ -1,0 +1,71 @@
+---
+title: "BACS HW (Week 1)"
+author: '106070038'
+output:
+  html_document: default
+  PDF: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+### 1. What is the 5th element in the original list of ages?
+Read table "customers.txt".
+```{r }
+customers <- read.table("customers.txt", header = TRUE)
+```
+Find the 5th element.
+```{r }
+customers[5,1]
+```
+
+### 2. What is the fifth lowest age?
+Use function **sort()** to order it into ascending or descending order. (Default is ascending.)
+```{r }
+ages <- sort(customers$age)
+ages[5]
+```
+
+### 3. Extract the five lowest ages together
+Find the five lowest ages.
+```{r }
+five_lowest_ages <- ages[1:5]
+five_lowest_ages
+```
+### 4. Get the five highest ages by first sorting them in decreasing order first.
+Use function **sort()** and add the argument "decreasing = TRUE" to sort it into decreasing.
+```{r }
+decreasing_ages <- sort(customers$age, decreasing = TRUE)
+five_highest_ages <- decreasing_ages[1:5]
+five_highest_ages
+```
+### 5. What is the average (mean) age?
+Use function **mean()** to get the arithmetic mean.
+```{r }
+mean(customers$age)
+```
+### 6. What is the standard deviation of ages? 
+Use function **sd()** to compute the standard deviation of the values.
+```{r }
+sd(customers$age)
+```
+### 7. Make a new variable called age_diff, with the difference between each age and the mean age
+Use minus sign **-** to subtract mean from each of the values.
+```{r }
+age_diff <- customers$age - mean(customers$age)
+age_diff
+```
+### 8. What is the average “difference between each age and the mean age”?
+The result should be close to zero. Also, **age_diff** can be used to calculate the standard deviation of ages.
+```{r }
+mean(age_diff)
+```
+### 9. Visualize the raw data as we did in class: (a) histogram, (b) density plot, (c) boxplot+stripchart
+Use function **hist(), plot(), boxplot(), stripchart()** to get each plot. Argument **main** can set the overall title for the plot.
+```{r fig.width = 6, fig.height = 4.5}
+hist(customers$age, main = "Histogram of ages", xlab = "ages")
+plot(density(customers$age), main = "Density plot of ages")
+boxplot(customers$age, horizontal = TRUE)
+stripchart(customers$age, method = "stack", add = TRUE)
+```
