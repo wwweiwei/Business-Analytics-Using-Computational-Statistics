@@ -243,19 +243,20 @@ q1</code></pre>
 <pre class="r"><code>q3</code></pre>
 <pre><code>##       75% 
 ## 0.7422213</code></pre>
-<pre class="r"><code>sd &lt;- 1
-sd_away_1 &lt;- q1/sd
-sd_away_2 &lt;- q2/sd
-sd_away_3 &lt;- q3/sd
+<pre class="r"><code>sd &lt;- sd(rdata)
+mean &lt;- mean(rdata)
+sd_away_1 &lt;- (q1-mean)/sd
+sd_away_2 &lt;- (q2-mean)/sd
+sd_away_3 &lt;- (q3-mean)/sd
 sd_away_1</code></pre>
 <pre><code>##        25% 
-## -0.6476919</code></pre>
+## -0.6427758</code></pre>
 <pre class="r"><code>sd_away_2</code></pre>
-<pre><code>##        50% 
-## 0.01162501</code></pre>
+<pre><code>##         50% 
+## -0.01269968</code></pre>
 <pre class="r"><code>sd_away_3</code></pre>
 <pre><code>##       75% 
-## 0.7422213</code></pre>
+## 0.6854945</code></pre>
 <ol start="3" style="list-style-type: lower-alpha">
 <li>Now create a new random dataset that is normally distributed with: n=2000, mean=35, sd=3.5. In this distribution, how many standard deviations away from the mean (use positive or negative) are those points corresponding to the 1st and 3rd quartiles? Compare your answer to (b)</li>
 </ol>
@@ -268,16 +269,16 @@ new_q1</code></pre>
 <pre class="r"><code>new_q3</code></pre>
 <pre><code>##      75% 
 ## 37.18349</code></pre>
-<pre class="r"><code>mean &lt;- 35
-sd &lt;- 3.5
+<pre class="r"><code>mean &lt;- mean(new_data)
+sd &lt;- sd(new_data)
 sd_away_1 &lt;- (new_q1-mean)/sd
 sd_away_3 &lt;- (new_q3-mean)/sd
 sd_away_1</code></pre>
 <pre><code>##        25% 
-## -0.6892595</code></pre>
+## -0.6622801</code></pre>
 <pre class="r"><code>sd_away_3</code></pre>
 <pre><code>##       75% 
-## 0.6238534</code></pre>
+## 0.6664321</code></pre>
 <p>The answer of (b) and (c) are close, because they both <strong>follow normal distribution</strong>.</p>
 <ol start="4" style="list-style-type: lower-alpha">
 <li>Finally, recall the dataset d123 shown in the description of question 1. In that distribution, how many standard deviations away from the mean (use positive or negative) are those data points corresponding to the 1st and 3rd quartiles? Compare your answer to (b)</li>

@@ -76,10 +76,11 @@ q3
 ```
 
 ```{r }
-sd <- 1
-sd_away_1 <- q1/sd
-sd_away_2 <- q2/sd
-sd_away_3 <- q3/sd
+sd <- sd(rdata)
+mean <- mean(rdata)
+sd_away_1 <- (q1-mean)/sd
+sd_away_2 <- (q2-mean)/sd
+sd_away_3 <- (q3-mean)/sd
 sd_away_1
 sd_away_2
 sd_away_3
@@ -94,8 +95,8 @@ new_q3 <- quantile(new_data, 0.75)
 new_q1
 new_q3
 
-mean <- 35
-sd <- 3.5
+mean <- mean(new_data)
+sd <- sd(new_data)
 sd_away_1 <- (new_q1-mean)/sd
 sd_away_3 <- (new_q3-mean)/sd
 sd_away_1
