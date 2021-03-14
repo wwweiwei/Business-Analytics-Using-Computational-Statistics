@@ -1,0 +1,224 @@
+---
+title: "BACS HW (Week 3)"
+author: "106070038"
+output:
+  html_document: default
+  PDF: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+### Question 1  Let’s have a look at how the mean and median behave. 
+
+(a)  Create and visualize a new “Distribution 2”: a combined dataset (n=800) that is negatively skewed (tail stretches to the left). Change the mean and standard deviation of d1, d2, and d3 to achieve this new distribution. Compute the mean and median, and draw lines showing the mean (thick line) and median (thin line).
+- **lwd** : the line width, a positive number
+```{r fig.width = 5, fig.height = 3.7}
+set.seed(1)
+# Three normally distributed data sets
+d1 <- rnorm(n=500, mean=45, sd=5)
+d2 <- rnorm(n=200, mean=30, sd=5)
+d3 <- rnorm(n=100, mean=15, sd=5)
+
+# Let’s combine them into a single dataset
+d123 <- c(d1, d2, d3)
+
+# Let’s plot the density function of abc
+plot(density(d123), col="blue", lwd=2, main = "Distribution 2")
+
+# Add vertical lines showing mean and median
+abline(v=mean(d123), lwd=3)
+abline(v=median(d123), lwd=1)
+```
+
+<br>
+(b) Create a “Distribution 3”: a single dataset that is normally distributed (bell-shaped, symmetric) -- you do not need to combine datasets, just use the rnorm function to create a single large dataset (n=800). Show your code, compute the mean and median, and draw lines showing the mean (thick line) and median (thin line).
+- **rnorm**: random generation for the normal distribution 
+```{r fig.width = 5, fig.height = 3.7}
+d4 <- rnorm(800)
+
+plot(density(d4), col="blue", lwd=2, main = "Distribution 3")
+
+abline(v=mean(d4), lwd=3)
+abline(v=median(d4), lwd=1)
+```
+
+(c) In general, which measure of central tendency (mean or median) do you think will be more sensitive (will change more) to outliers being added to your data?
+- My answer: **mean**, however, in some circumstances, we should depend on **the number of data**. If the number of data tends to increase (large dataset), the effect of adding an outlier will be very small.<br>
+For example, mean = (sum of original dataset+outlier)/(N+1), N is the number of data. When N=1000 and outlier=1000, the change of mean is just about 1, but the change of median depends on the distribution.<br>
+Ref: https://statistics.laerd.com/statistical-guides/measures-central-tendency-mean-mode-median.php
+
+### Question 2 Let’s try to get some more insight about what standard deviations are.
+(a) Create a random dataset (call it ‘rdata’) that is normally distributed with: n=2000, mean=0, sd=1.  Draw a density plot and put a solid vertical line on the mean, and dashed vertical lines at the 1st, 2nd, and 3rd standard deviations to the left and right of the mean. You should have a total of 7 vertical lines (one solid, six dashed).
+```{r fig.width = 5, fig.height = 3.7}
+rdata <- rnorm(n=2000, mean=0, sd=1)
+plot(density(rdata), col="blue", lwd=2, main = "Distribution 2")
+abline(v=mean(rdata), lwd=3)
+sd <- 1
+abline(v=mean(rdata)+sd, lty="dashed")
+abline(v=mean(rdata)+2*sd, lty="dashed")
+abline(v=mean(rdata)+3*sd, lty="dashed")
+abline(v=mean(rdata)-sd, lty="dashed")
+abline(v=mean(rdata)-2*sd, lty="dashed")
+abline(v=mean(rdata)-3*sd, lty="dashed")
+```
+
+(b) Using the quantile() function, which data points correspond to the 1st, 2nd, and 3rd quartiles (i.e., 25th, 50th, 75th percentiles)? How many standard deviations away from the mean (divide by standard-deviation; keep positive or negative sign) are those points corresponding to the 1st, 2nd, and 3rd quartiles?
+- **quantile**: produces sample quantiles corresponding to the given probabilities
+```{r }
+q1 <- quantile(rdata, 0.25)
+q2 <- quantile(rdata, 0.5)
+q3 <- quantile(rdata, 0.75)
+q1
+q2
+q3
+```
+
+```{r }
+sd <- 1
+sd_away_1 <- q1/sd
+sd_away_2 <- q2/sd
+sd_away_3 <- q3/sd
+sd_away_1
+sd_away_2
+sd_away_3
+```
+
+(c) Now create a new random dataset that is normally distributed with: n=2000, mean=35, sd=3.5. 
+In this distribution, how many standard deviations away from the mean (use positive or negative) are those points corresponding to the 1st and 3rd quartiles? Compare your answer to (b)
+```{r }
+new_data <- rnorm(n=2000, mean=35, sd=3.5)
+new_q1 <- quantile(new_data, 0.25)
+new_q3 <- quantile(new_data, 0.75)
+new_q1
+new_q3
+
+mean <- 35
+sd <- 3.5
+sd_away_1 <- (new_q1-mean)/sd
+sd_away_3 <- (new_q3-mean)/sd
+sd_away_1
+sd_away_3
+```
+
+The answer of (b) and (c) are close, because they both **follow normal distribution**.
+
+(d) Finally, recall the dataset d123 shown in the description of question 1. In that distribution, how many standard deviations away from the mean (use positive or negative) are those data points corresponding to the 1st and 3rd quartiles? Compare your answer to (b)
+```{r }
+d123_q1 <- quantile(d123, 0.25)
+d123_q3 <- quantile(d123, 0.75)
+d123_q1
+d123_q3
+
+mean <- mean(d123)
+sd <- sd(d123)
+sd_away_1 <- (d123_q1-mean)/sd
+sd_away_3 <- (d123_q3-mean)/sd
+sd_away_1
+sd_away_3
+```
+
+- d123 is negatively skewed(tail stretches to the left), as a result, d123(sd_away_3) is bigger than rdata(sd_away_3).
+
+### Question 3  We mentioned in class that there might be some objective ways of determining the bin size of histograms. Take a quick look at the Wikipedia article on Histograms (“Number of bins and width”) to see the different ways to calculate bin width (h) and number of bins (k).
+(a) From the question on the forum, which formula does Rob Hyndman’s answer (1st answer) suggest to use for bin widths/number? Also, what does the Wikipedia article say is the benefit of that formula?
+- bin widths:
+$$ ℎ = 2 × IQR × n^\frac{1}{3} $$
+- the number of bins:
+$$ nb = \frac{max−min}{ℎ}$$
+- The benefit of the formula: It replaces 3.5σ of Scott's rule with 2 IQR, which is less sensitive than the standard deviation to outliers in data.
+
+
+(b) Given a random normal distribution:  
+  rand_data <- rnorm(800, mean=20, sd = 5) 
+Compute the bin widths (h) and number of bins (k) according to each of the following formula:
+i. Sturges’ formula
+$$nb = \lceil \log _{2}n\rceil +1,\,$$
+
+- In "hist", the default of break is "Sturges"
+```{r fig.width = 5, fig.height = 3.7}
+rand_data <- rnorm(800, mean = 20, sd = 5) 
+
+## method 1
+nb <- nclass.Sturges(rand_data)
+nb
+bw <- (max(rand_data)-min(rand_data))/nb
+bw
+
+## method 2
+# n <- length(rand_data)
+# nb <- ceiling(log(n,2))+1
+# nb
+
+hist(rand_data)
+```
+
+ii. Scott’s normal reference rule (uses standard deviation)
+
+```{r fig.width = 5, fig.height = 3.7}
+nb <- nclass.scott(rand_data)
+nb
+bw <- (max(rand_data)-min(rand_data))/nb
+bw
+hist(rand_data, breaks = "Scott")
+```
+
+iii. Freedman-Diaconis’ choice (uses IQR)
+```{r fig.width = 5, fig.height = 3.7}
+rand_data <- rnorm(800, mean=20, sd = 5) 
+
+## method 1
+# nclass.FD(rand_data)
+
+## method 2
+bw <- 2 * IQR(rand_data) / length(rand_data)^(1/3)
+bw
+nb <- (max(rand_data)-min(rand_data))/bw
+nb
+
+hist(rand_data, breaks="FD")
+```
+
+- My answer: 
+  - Sturges: nb=11, bw=3.116805
+  - Scott: nb=18, bw=1.904714
+  - FD: nb=19.32595, bw=1.461656
+- Ref: http://ritsokiguess.site/docs/2017/06/08/histograms-and-bins/
+
+(c) Repeat part (b) but extend the rand_data dataset with some outliers (use a new dataset out_data):
+  out_data <- c(rand_data, runif(10, min=40, max=60))
+```{r}
+out_data <- c(rand_data, runif(10, min=40, max=60))
+
+## Sturge
+nb <- nclass.Sturges(out_data)
+nb
+bw <- (max(out_data)-min(out_data))/nb
+bw
+
+## Scott
+nb <- nclass.scott(out_data)
+nb
+bw <- (max(out_data)-min(out_data))/nb
+bw
+
+## FD
+bw <- 2 * IQR(out_data) / length(out_data)^(1/3)
+bw
+nb <- (max(out_data)-min(out_data))/bw
+nb
+
+# hist(out_data, breaks = "Sturges")
+# hist(out_data, breaks = "scott")
+# hist(out_data, breaks = "FD")
+```
+
+- My answer: 
+  - Sturges: nb=11, bw=4.702551
+  - Scott: nb=23, bw=2.249046
+  - FD: nb=35.05081, bw=1.475802
+
+(d) From your answers above, in which of the three methods does the bin width (h) change the least when outliers are added (i.e., which is least sensitive to outliers), and (briefly) WHY do you think that is?
+- My answer: **Freedman–Diaconis'**, because IQR is less sensitive than the standard deviation to outliers in data.
+
