@@ -22,13 +22,13 @@ i) What should we expect the mean and standard deviation of rnorm_std to be, and
 
 
 ```{r fig.width = 5, fig.height = 3.7}
-rnorm <- rnorm(n=100000, mean=940, sd=190)
+rnorm_ <- rnorm(n=100000, mean=940, sd=190)
 
 standardized <- function(numbers) {
   numbers <- (numbers - mean(numbers)) / sd(numbers)
   return(numbers)
 }
-rnorm_std <- standardized(rnorm)
+rnorm_std <- standardized(rnorm_)
 
 print("mean:")
 print(mean(rnorm_std))
@@ -103,10 +103,9 @@ visualize_sample_ci(num_samples = 100, sample_size = 100, pop_size=10000,
 #     visualize_sample_ci(sample_size=300, distr_func=rnorm, mean=50, sd=10)
 #     visualize_sample_ci(sample_size=300, distr_func=runif, min=17, max=35)
 
-visualize_sample_ci <- function(num_samples = 100, sample_size = 100, 
-                                pop_size=10000, distr_func=rnorm, ...) {
+visualize_sample_ci <- function(num_samples = 100, sample_size = 100, pop_size=10000, FUN=rnorm, ...) {
   # Simulate a large population
-  population_data <- distr_func(pop_size, ...)
+  population_data <- FUN(pop_size, ...)
   pop_mean <- mean(population_data)
   pop_sd <- sd(population_data)
   
@@ -149,13 +148,8 @@ add_ci_segment <- function(ci95_low, ci95_high, ci99_low, ci99_high,
   segments(ci95_low, indices, ci95_high, indices, lwd=3, col=color[2])
   points(sample_means, indices, pch=18, cex=0.6, col=color[3])
 }
-
+visualize_sample_ci(num_samples = 100, sample_size = 100, pop_size = 10000, FUN = rnorm, mean=20,sd=3)
 ```
-
-```{r fig.width = 5, fig.height = 3.7}
-visualize_sample_ci(num_samples = 100, sample_size = 100, pop_size=10000, distr_func=rnorm, mean=20, sd=3)
-```
-
 
 i) How many samples do we expect to NOT include the population mean in its 95% CI?
 - Answer: six (dark red line)
@@ -165,7 +159,7 @@ ii) How many samples do we expect to NOT include the population mean in their 99
 b) Rerun the previous simulation with larger samples (sample_size=300):
 i) Now that the size of each sample has increased, do we expect their 95% and 99% CI to become wider or narrower than before?
 ```{r fig.width = 5, fig.height = 3.7}
-visualize_sample_ci(num_samples = 100, sample_size = 300, pop_size=10000, distr_func=rnorm, mean=20, sd=3)
+visualize_sample_ci(num_samples = 100, sample_size = 300, pop_size=10000, FUN=rnorm, mean=20, sd=3)
 ```
 -Answer: As the size of each sample has increased,the 95% and 99% CI become narrower than before.
 
@@ -176,8 +170,8 @@ c) If we ran the above two examples (a and b) using a uniformly distributed popu
 
 ```{r fig.width = 5, fig.height = 3.7}
 par(mfcol=c(1,2)) 
-visualize_sample_ci(num_samples = 100, sample_size = 100, pop_size=10000, distr_func=runif)
-visualize_sample_ci(num_samples = 100, sample_size = 300, pop_size=10000, distr_func=runif)
+visualize_sample_ci(num_samples = 100, sample_size = 100, pop_size=10000, FUN=runif)
+visualize_sample_ci(num_samples = 100, sample_size = 300, pop_size=10000, FUN=runif)
 ```
 - Answer:
   - sample_size = 100, distr_func=runif
