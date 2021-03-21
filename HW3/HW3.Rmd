@@ -99,6 +99,10 @@ a) Simulate 100 samples (each of size 100), from a normally distributed populati
 visualize_sample_ci(num_samples = 100, sample_size = 100, pop_size=10000, 
                       distr_func=rnorm, mean=20, sd=3)
                       
+- num_samples: number of bar
+- sample_size: the number of samples on the bar
+- pop_size: the population size
+                      
 ```{r }
 # Visualize the confidence intervals of samples drawn from a population
 #   e.g.,
@@ -155,9 +159,9 @@ visualize_sample_ci(num_samples = 100, sample_size = 100, pop_size = 10000, FUN 
 ```
 
 i) How many samples do we expect to NOT include the population mean in its 95% CI?
-- Answer: four (dark red line)
+- Answer: In 95% CI, I expect that there are 5 samples out of 100 that not including the population mean. In my experiment(setting random seed 1), there are 4 samples (dark red line) out of 100 that not include the population mean.
 ii) How many samples do we expect to NOT include the population mean in their 99% CI?
-- Answer: zero (light red line)
+- Answer: In 99% CI, I expect that there are 1 sample out of 100 that not including the population mean. In my experiment(setting random seed 1), there is 0 sample (light red line) out of 100 that not include the population mean.
 
 b) Rerun the previous simulation with larger samples (sample_size=300): <br>
 i. Now that the size of each sample has increased, do we expect their 95% and 99% CI to become wider or narrower than before?
@@ -165,10 +169,11 @@ i. Now that the size of each sample has increased, do we expect their 95% and 99
 visualize_sample_ci(num_samples = 100, sample_size = 300, pop_size=10000, FUN=rnorm, mean=20, sd=3)
 ```
 
-- Answer: As the size of each sample has increased,the 95% and 99% CI become narrower than before.
+- Answer: As the size of each sample has increased,the 95% and 99% CI become narrower than before, because as sample size(n) increases, $\sigma_{\overline{x}}$ decreases.
+$$ \sigma_{\overline{x}} = \dfrac{\sigma}{\sqrt{n}}$$
 
 ii) This time, how many samples (out of the 100) would we expect to NOT include the population mean in its 95% CI?
-- Answer: seven (dark red line)
+- Answer: In 95% CI, I expect that there are 5 samples out of 100 that not including the population mean. In my experiment(setting random seed 1), there are 7 samples (dark red line) out of 100 that not include the population mean.
 
 c) If we ran the above two examples (a and b) using a uniformly distributed population (specify distr_func=runif for visualize_sample_ci), how do you expect your answers to (a) and (b) to change, and why?
 
@@ -179,16 +184,17 @@ visualize_sample_ci(num_samples = 100, sample_size = 300, pop_size=10000, FUN=ru
 ```
 
 - Answer:
-  - sample_size = 100, distr_func=runif
+  - **sample_size = 100**, distr_func=runif
+    - yes, it will change, because rnorm and runif are different distribution.
     - i) How many samples do we expect to NOT include the population mean in its 95% CI?
-      - Answer: seven (dark red line)
+      - Answer: In 95% CI, I expect that there are 5 samples out of 100 that not including the population mean. In my experiment(setting random seed 1), there are 7 samples (dark red line) out of 100 that not include the population mean.
     - ii) How many samples do we expect to NOT include the population mean in their 99% CI?
-      - Answer: zero (light red line)
-  - sample_size = 300, distr_func=runif
+      - Answer: In 99% CI, I expect that there are 1 sample out of 100 that not including the population mean. In my experiment(setting random seed 1), there is 0 sample (light red line) out of 100 that not include the population mean.
+  - **sample_size = 300**, distr_func=runif
     - i) Now that the size of each sample has increased, do we expect their 95% and 99% CI to become wider or narrower than before?
       - Answer: As the size of each sample has increased,the 95% and 99% CI become narrower than before. The result is same as "rnorm".
     - ii) This time, how many samples (out of the 100) would we expect to NOT include the population mean in its 95% CI?
-      - Answer: six (dark red line)
+      - Answer: In 95% CI, I expect that there are 5 samples out of 100 that not including the population mean. In my experiment(setting random seed 1), there are 6 samples (dark red line) out of 100 that not include the population mean.
 
 
 #### Question 3) The startup company EZTABLE has an online restaurant reservation system that is accessible by mobile and web. Imagine that EZTABLE would like to start a promotion for new members to make their bookings earlier in the day.
@@ -205,7 +211,6 @@ hours  <- as.POSIXlt(bookings$datetime, format="%m/%d/%Y %H:%M")$hour
 mins   <- as.POSIXlt(bookings$datetime, format="%m/%d/%Y %H:%M")$min
 minday <- hours*60 + mins
 # plot(density(minday), main="Minute (of the day) of first ever booking", col="blue", lwd=2)
-
 
 # print the ans
 cat("mean:", mean(minday), "\n")
