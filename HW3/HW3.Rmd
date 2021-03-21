@@ -15,11 +15,9 @@ knitr::opts_chunk$set(echo = TRUE)
 set.seed(1)
 ```
 
-### Question 1) Let’s reexamine what it means to standardize data. To standardize a vector, 
-subtract the mean of the vector from all its values, and then divide them by the standard deviation.
-a) Create a normal distribution (mean=940, sd=190) and standardize it (let’s call it rnorm_std)
-i) What should we expect the mean and standard deviation of rnorm_std to be, and why?
-
+### Question 1) Let’s reexamine what it means to standardize data. To standardize a vector, subtract the mean of the vector from all its values, and then divide them by the standard deviation.
+a) Create a normal distribution (mean=940, sd=190) and standardize it (let’s call it rnorm_std) <br>
+i. What should we expect the mean and standard deviation of rnorm_std to be, and why?
 
 ```{r fig.width = 5, fig.height = 3.7}
 rnorm_ <- rnorm(n=100000, mean=940, sd=190)
@@ -29,19 +27,20 @@ standardized <- function(numbers) {
   return(numbers)
 }
 rnorm_std <- standardized(rnorm_)
+mean_rnorm_std <- mean(rnorm_std)
 
-print("mean:")
-print(mean(rnorm_std))
-print("sd:")
-print(sd(rnorm_std))
+# print the answer
+cat("mean:", mean(rnorm_std), "\n")
+cat("sd:", sd(rnorm_std), "\n")
 ```
-- Answer: After standardized, the mean should be 0 and the sd should be 1.
+- Answer: After standardized, the mean should be close to 0 and the sd should be close to 1.
 <br>
 
 ii) What should the distribution (shape) of rnorm_std look like, and why?
 ```{r fig.width = 5, fig.height = 3.7}
 plot(density(rnorm_std), col="blue", lwd=2, main = "Distribution of rnorm_std")
 ```
+
 - Answer: After standardized, the distribution is close to a **normal distribution**. 
 <br>
 
@@ -50,7 +49,7 @@ iii) What do we generally call distributions that are normal and standardized?
 $$
 f(x)=\dfrac{1}{\sigma\sqrt{2\pi}} e^{-\dfrac{1}{2}(\dfrac{x-\mu}{\sigma})^2}\\
 $$
-- Answer: Every normal distribution is a version of the standard normal distribution. if X is a normal deviate with parameters \mu and \sigma ^{2}, then this X distribution can be re-scaled and shifted via the formula Z = (X−\mu)/\sigma
+- Answer: Every normal distribution is a version of the standard normal distribution. if X is a normal deviate with parameters $\mu$ and $\sigma ^2$, then this X distribution can be re-scaled and shifted via the formula $$Z = \dfrac{(X−\mu)}{\sigma}$$
  to convert it to the "standard" normal distribution. This variate is also called the **standardized form of X**.
 - Ref: https://en.wikipedia.org/wiki/Normal_distribution
 <br>
@@ -68,20 +67,17 @@ standardized <- function(numbers) {
 }
 minday_std <- standardized(minday)
 
-print("Original bookings datetime:")
-bookings$datetime[1:10]
-print("Standardized version (minday_std):")
-minday_std[1:10]
+# print the answer
+cat("Original bookings datetime:", bookings$datetime[1:10], "...","\n")
+cat("Standardized version(minday_std):", minday_std[1:10], "...")
 ```
 <br>
 i) What should we expect the mean and standard deviation of minday_std to be, and why?
 - Answer: After standardized, the mean should be close to 0 and the sd should be close to 1.
 
 ```{r fig.width = 5, fig.height = 3.7}
-print("mean:")
-print(mean(minday_std))
-print("sd:")
-print(sd(minday_std))
+cat("mean:", mean(minday_std), "\n")
+cat("sd:", sd(minday_std))
 ```
 
 ii) What should the distribution of minday_std look like compared to minday, and why?
@@ -152,9 +148,9 @@ visualize_sample_ci(num_samples = 100, sample_size = 100, pop_size = 10000, FUN 
 ```
 
 i) How many samples do we expect to NOT include the population mean in its 95% CI?
-- Answer: six (dark red line)
+- Answer: four (dark red line)
 ii) How many samples do we expect to NOT include the population mean in their 99% CI?
-- Answer: two (light red line)
+- Answer: zero (light red line)
 
 b) Rerun the previous simulation with larger samples (sample_size=300):
 i) Now that the size of each sample has increased, do we expect their 95% and 99% CI to become wider or narrower than before?
@@ -164,7 +160,7 @@ visualize_sample_ci(num_samples = 100, sample_size = 300, pop_size=10000, FUN=rn
 -Answer: As the size of each sample has increased,the 95% and 99% CI become narrower than before.
 
 ii) This time, how many samples (out of the 100) would we expect to NOT include the population mean in its 95% CI?
-- Answer: five (dark red line)
+- Answer: seven (dark red line)
 
 c) If we ran the above two examples (a and b) using a uniformly distributed population (specify distr_func=runif for visualize_sample_ci), how do you expect your answers to (a) and (b) to change, and why?
 
@@ -176,9 +172,9 @@ visualize_sample_ci(num_samples = 100, sample_size = 300, pop_size=10000, FUN=ru
 - Answer:
   - sample_size = 100, distr_func=runif
     - i) How many samples do we expect to NOT include the population mean in its 95% CI?
-      - Answer: six (dark red line)
+      - Answer: seven (dark red line)
     - ii) How many samples do we expect to NOT include the population mean in their 99% CI?
-      - Answer: two (light red line)
+      - Answer: zero (light red line)
   - sample_size = 300, distr_func=runif
     - i) Now that the size of each sample has increased, do we expect their 95% and 99% CI to become wider or narrower than before?
       - Answer: As the size of each sample has increased,the 95% and 99% CI become narrower than before. The result is same as "rnorm".
@@ -201,12 +197,11 @@ mins   <- as.POSIXlt(bookings$datetime, format="%m/%d/%Y %H:%M")$min
 minday <- hours*60 + mins
 # plot(density(minday), main="Minute (of the day) of first ever booking", col="blue", lwd=2)
 
-print("mean:")
-mean(minday)
-print("sd:")
-sd(minday)
-print("95% CI:")
-quantile(minday, probs=c(0.025, 0.975))
+
+# print the ans
+cat("mean:", mean(minday), "\n")
+cat("sd:", sd(minday), "\n")
+cat("95% CI:", quantile(minday, probs=c(0.025, 0.975)))
 
 ```
 <br>
@@ -216,15 +211,12 @@ ii) Bootstrap to produce 2000 new samples from the original sample
 sample_size = 2000
 sample0 = sample(minday, sample_size)
 sample0_mean = mean(sample0)
-print("sample0:")
-print(sample0)
-#print("sample0_mean:")
-#print(mean(sample0))
+cat("sample0:", print(sample0), "\n")
+# cat("sample0_mean:", mean(sample0), "\n")
 
 resamples <- replicate(2000, sample(sample0, length(sample0), replace=TRUE))
-resamples
-#print("resamples_mean:")
-#print(mean(resamples))
+cat("resamples:", resamples)
+# cat("resamples_mean:", mean(resamples))
 ```
 <br>
 
@@ -255,7 +247,7 @@ b) By what time of day, have half the new members of the day already arrived at 
 i) Estimate the median of minday
 - Answer: 1040
 ```{r }
-median(minday)
+cat("median of minday:", median(minday))
 ```
 <br>
 
@@ -271,8 +263,8 @@ hist(median, main="Histogram of median of resamples")
 ```
 <br>
 iii) Estimate the 95% CI of the bootstrapped medians.
-- Answer: 1004.625-1050.000 
-```{r fig.width = 5, fig.height = 3.7}
+- Answer: 960-1050 
+```{r }
 quantile(median, probs=c(0.025, 0.975))
 ```
 
