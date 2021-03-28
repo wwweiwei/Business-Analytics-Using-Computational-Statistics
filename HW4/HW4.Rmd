@@ -14,19 +14,25 @@ knitr::opts_chunk$set(echo = TRUE)
 ### Question 1
 ##### a. Given the critical DOI score that Google uses to detect malicious apps (-3.7), what is the probability that a randomly chosen app from Google’s app store will turn off the Verify security feature?
 
-$$
-Z = \dfrac{x-\mu}{\sigma} = \dfrac{x-p*N}{\sqrt{N*p*(1-p)}}
-$$
 
-- Answer: Z < -3.7 means 
+- Answer: 0.0001077997
 
+```{r fig.width = 6, fig.height = 4.5}
+pnorm(-3.7)
+```
 
 ##### b. Assuming there were ~2.2 million apps when the article was written, what number of apps on the Play Store did Google expect would maliciously turn off the Verify feature once installed?
 
 - Answer: 
 
   - 2.2 millions = 22,000,000
-  - 22,000,000 * p = 
+  - 22,000,000 * 0.0001077997 = 2371.593
+  - **About 2372 apps**
+  
+```{r}
+malicious_N = 22000000 * 0.0001077997
+malicious_N
+```
 
 ### Question 2
 ##### a. The Null distribution of t-values:
@@ -39,13 +45,14 @@ plot(density(verizon$Time), lwd = 2, main = "Density plot of time")
 abline(v = mean(verizon$Time), col = "blue", lwd = 3)
 mean(verizon$Time)
 ```
+
 (ii.) Given what PUC wishes to test, how would you write the hypothesis? (not graded)
 
 - Answer: 
 
-  - H0: $\mu$ = 7.6
+  - H0: $\mu =$ 7.6
 
-  - H1: $\mu$ != 7.6
+  - H1: $\mu \neq$ 7.6
 
 (iii.) Estimate the population mean, and the 99% confidence interval (CI) of this estimate
 
@@ -80,7 +87,7 @@ t <- (sample_mean - avg_time_hypo) / se
 df <- sample_size - 1 
 p <- 1 - pt(t, df)
 
-cat(" sample size =",sample_size, ", mean of sample =", sample_mean, "\n","standard deviation of sample =",sample_sd, ", standard error of sample =", se, "\n","Answer:","\n","t-statistic =",t, ", p-value =", p )
+cat(" sample size =",sample_size, ", mean of sample =", sample_mean, "\n","standard deviation of sample =",sample_sd, ", standard error of sample =", se, "\n","**Answer:","\n","t-statistic =",t, ", p-value =", p )
 ```
 
 (v.) Briefly describe how these values relate to the Null distribution of t (not graded)
@@ -156,7 +163,7 @@ cat("99% CI of the bootstrapped t-statistic =>", t_ci_99)
 
 - i. Bootstrapped 99% CI of the mean
 
-```{r fig.width = 6, fig.height = 4.5}
+```{r fig.width = 5, fig.height = 3.5}
 plot(density(mean_boots), col="blue", main="Plot of bootstrapped mean", lwd=2)
 abline(v=mean(mean_boots))
 abline(v=pop_mean_ci_99, lty="dashed")
@@ -164,7 +171,7 @@ abline(v=pop_mean_ci_99, lty="dashed")
 
 - ii. Bootstrapped difference between the population mean and the hypothesized mean
 
-```{r fig.width = 6, fig.height = 4.5}
+```{r fig.width = 5, fig.height = 3.5}
 plot(density(mean_diffs_boots), col="blue", main="Plot of bootstrapped mean difference", lwd=2)
 abline(v=mean(mean_diffs_boots))
 abline(v=diff_ci_99, lty="dashed")
@@ -172,7 +179,7 @@ abline(v=diff_ci_99, lty="dashed")
 
 - iii. Bootstrapped t-statistic
 
-```{r fig.width = 6, fig.height = 4.5}
+```{r fig.width = 5, fig.height = 3.5}
 plot(density(t_boots), col="blue", main="Standardized mean difference", lwd=2)
 abline(v=mean(t_boots))
 abline(v=t_ci_99, lty="dashed")
