@@ -28,8 +28,10 @@ verizon <- read_csv("verizon.csv")
 ILEC = verizon[which(verizon$Group == "ILEC"), ]
 CLEC = verizon[which(verizon$Group == "CLEC"), ]
 
-plot(density(ILEC$Time),col="red", main = "Density plot of ILEC and CLEC time")
+plot(density(ILEC$Time),col="red", main = "Density plot of ILEC and CLEC time",)
 lines(density(CLEC$Time),col="blue", lty="dashed")
+
+legend("topright", legend=c("ILEC", "CLEC"),col=c("red", "blue"), lty=1:2, cex=1.8, box.lty=0)
 ```
 
 ## b. Use the appropriate form of the t.test() function to test the difference between the mean of ILEC sample response times versus the mean of CLEC sample response times. From the output of t.test():
@@ -43,49 +45,39 @@ lines(density(CLEC$Time),col="blue", lty="dashed")
 ### b-ii. Based on output of the t.test(), would you reject the null hypothesis or not?
 
 ```{r fig.width = 6, fig.height = 4.5}
-t.test(ILEC$Time, CLEC$Time, var.equal=FALSE)
+t.test(ILEC$Time, CLEC$Time, conf.level = 0.99)
 ```
 
-- Answer: p = 0.05975 > 0.05, Not reject H~null~
+- Answer: p = 0.05975 > 0.01, Not reject H~null~
 
-### c. Let’s try this using bootstrapping: Estimate bootstrapped null and alternative values of t by using the same t.test() function to compare: bootstrapped samples of ILEC against bootstrapped samples of CLEC (alt t-values);  and bootstrapped samples of ILEC against the original ILEC sample (null t-values).
-
-**need modify**
+### c. Let’s try this using bootstrapping
 
 ```{r fig.width = 6, fig.height = 4.5}
 set.seed(321)
-
-# alt t-values
-bootstrap <- function(sample0) { 
-  sample(sample0, size = length(sample0), replace = TRUE)
-}
-t.test(bootstrap(ILEC$Time), bootstrap(CLEC$Time), var.equal=FALSE)
-
-# null t-values
-hyp_mean = mean(ILEC$Time)
-bootstrap_null_alt <- function(sample0, hyp_mean) { 
+bootstrap_null_alt <- function(sample0, sample1) { 
   resample <- sample(sample0, length(sample0), replace=TRUE) 
   resample_se <- sd(resample) / sqrt(length(resample))
   
-  t_stat_alt <- (mean(resample) - hyp_mean) / resample_se
+  resample_1 <- sample(sample1, length(sample1), replace=TRUE) 
+  resample_se_1 <- sd(resample) / sqrt(length(resample))
+  
+  t_stat_alt <- (mean(resample) - mean(resample_1)) / resample_se
   t_stat_null <- (mean(resample) - mean(sample0)) / resample_se
-
   c(t_stat_alt, t_stat_null)
 }
+boot_t_stats <- replicate(2000, bootstrap_null_alt(ILEC$Time, CLEC$Time))
 
-boot_t_stats <- replicate(2000, bootstrap_null_alt(ILEC$Time, hyp_mean))
-t_alt <- boot_t_stats[1,]
-t_null <- boot_t_stats[2,]
-plot(density(t_alt), lwd=2) 
-abline(v=mean(t_alt), lty="dotted")
-lines(density(t_null), lty="dashed")
+
 ```
+
 
 ### c-i. Plot a distribution of the bootstrapped null t-values and alternative t-values, adding vertical lines to show the 5% rejection zone of the null distribution (use the same one-vs-two tail logic as 1b).
 
 ```{r fig.width = 6, fig.height = 4.5}
-plot(density(t_alt), xlim=c(-4,6), lwd=2) 
+t_alt <- boot_t_stats[1,] 
+plot(density(t_alt), main = "bootstrap density plot", lwd=2, ylim=c(0,0.45)) 
 abline(v=mean(t_alt), lty="dotted")
+t_null <- boot_t_stats[2,] 
 lines(density(t_null), lty="dashed")
 
 ci_95 <- quantile(t_null, probs=c(0.025, 0.975))
@@ -94,7 +86,7 @@ abline(v=ci_95, lty="dotted")
 
 ##### c-ii. Based on these bootstrapped results, should we reject the null hypothesis?
 
-- Answer: No, we should not reject H~null~.
+- Answer: Yes, we should reject H~null~.
 
 ### Question 2 We also wish to test whether the variance of ILEC response times is different than the variance of CLEC response times.
 ##### a. What is the null and alternative hypotheses in this case? 
