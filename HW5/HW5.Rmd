@@ -1,16 +1,18 @@
----
+ ---
 title: "BACS HW (Week 6)"
-runningheader: "BACS HW (Week 6)"
-author: "106070038"
+author: '106070038'
 date: "`r Sys.Date()`"
 output:
-  tufte::tufte_html: default
+  html_document:
+    df_print: paged
   tufte::tufte_handout:
     citation_package: natbib
     latex_engine: xelatex
   tufte::tufte_book:
     citation_package: natbib
     latex_engine: xelatex
+  tufte::tufte_html: default
+runningheader: BACS HW (Week 6)
 bibliography: skeleton.bib
 link-citations: yes
 ---
@@ -18,6 +20,8 @@ link-citations: yes
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
+
+Special thanks to 106070020 for discussing with me.
 
 # Question 1
 ## a. Visualize Verizon’s response times for ILEC vs. CLEC customers
@@ -32,6 +36,9 @@ plot(density(ILEC$Time),col="red", main = "Density plot of ILEC and CLEC time",)
 lines(density(CLEC$Time),col="blue", lty="dashed")
 
 legend("topright", legend=c("ILEC", "CLEC"),col=c("red", "blue"), lty=1:2, cex=1.8, box.lty=0)
+
+#var(ILEC$Time)
+#var(CLEC$Time)
 ```
 
 ## b. Use the appropriate form of the t.test() function to test the difference between the mean of ILEC sample response times versus the mean of CLEC sample response times. From the output of t.test():
@@ -57,31 +64,32 @@ set.seed(321)
 bootstrap_null_alt <- function(sample0, sample1) { 
   resample <- sample(sample0, length(sample0), replace=TRUE) 
   resample_se <- sd(resample) / sqrt(length(resample))
-  
   resample_1 <- sample(sample1, length(sample1), replace=TRUE) 
-  resample_se_1 <- sd(resample) / sqrt(length(resample))
+  resample_se_1 <- sd(resample_1) / sqrt(length(resample_1))
   
-  t_stat_alt <- (mean(resample) - mean(resample_1)) / resample_se
+  t_stat_alt <- (mean(resample_1) - mean(resample)) / sqrt(resample_se^2+resample_se_1^2)
   t_stat_null <- (mean(resample) - mean(sample0)) / resample_se
   c(t_stat_alt, t_stat_null)
 }
 boot_t_stats <- replicate(2000, bootstrap_null_alt(ILEC$Time, CLEC$Time))
-
-
 ```
 
+### c-i. Plot a distribution of the bootstrapped null t-values and alternative t-values.
 
-### c-i. Plot a distribution of the bootstrapped null t-values and alternative t-values, adding vertical lines to show the 5% rejection zone of the null distribution (use the same one-vs-two tail logic as 1b).
+- Ans: 
+  - green line is null t-values
+  - red lines are 95% CI
+  - black line is alternative t-values
 
 ```{r fig.width = 6, fig.height = 4.5}
 t_alt <- boot_t_stats[1,] 
-plot(density(t_alt), main = "bootstrap density plot", lwd=2, ylim=c(0,0.45)) 
-abline(v=mean(t_alt), lty="dotted")
+plot(density(t_alt), main = "bootstrap density plot", lwd=2, ylim=c(0,1), xlim=c(-6,6)) 
+abline(v=mean(t_alt), lty="dotted", col="blue", lwd = 2)
 t_null <- boot_t_stats[2,] 
-lines(density(t_null), lty="dashed")
+lines(density(t_null), lty="dashed",col='green', lwd = 2)
 
 ci_95 <- quantile(t_null, probs=c(0.025, 0.975))
-abline(v=ci_95, lty="dotted")
+abline(v=ci_95, lty="dotted",col='red', lwd = 2)
 ```
 
 ##### c-ii. Based on these bootstrapped results, should we reject the null hypothesis?
@@ -92,33 +100,35 @@ abline(v=ci_95, lty="dotted")
 ##### a. What is the null and alternative hypotheses in this case? 
 
 - Answer: 
-  - H~null~: $\sigma$~ILEC~ = $\sigma$~CLEC~
-  - H~alt~: $\sigma$~ILEC~ $\neq$ $\sigma$~CLEC~
+  - H~null~: $\sigma$~ILEC~ <= $\sigma$~CLEC~
+  - H~alt~:  $\sigma$~CLEC~ > $\sigma$~ILEC~
 
 ## b. Let’s try traditional statistical methods first:
 ### b-i. What is the F-statistic of the ratio of variances?
 
 ```{r }
-var.test(ILEC$Time, CLEC$Time, alternative="greater")
+var.test(CLEC$Time, ILEC$Time, alternative="greater")
 ```
 
 ### b-ii. What is the cut-off value of F, such that we want to reject the 5% most extreme F-values?
 
 ```{r }
-f_value = var(ILEC$Time)/var(CLEC$Time)
+f_value = var(CLEC$Time)/var(ILEC$Time)
 f_value
 ```
 
 ### b-iii. Use the qf() function in R to determine the cutoff. Can we reject the null hypothesis?
 
 ```{r }
-qf(p=0.95, df1=length(ILEC$Time)-1, df2=length(CLEC$Time)-1)
+qf(p=0.95, df1=length(CLEC$Time)-1, df2=length(ILEC$Time)-1)
 ```
 
-- Answer:
+- Answer: Yes, we should reject H~null~.
 
 ## c. Let’s try bootstrapping this time:
 ### c-i. Create bootstrapped values of the F-statistic, for both null and alternative hypotheses.
+
+var(CLEC) > var(ILEC), so CLEC is larger and ILEC is smaller.
 
 ```{r fig.width = 6, fig.height = 4.5}
 set.seed(4321)
@@ -130,10 +140,9 @@ sd_providers_test <- function(larger_sd_sample, smaller_sd_sample) {
   c(f_alt, f_null) 
 }
 
-f_stats <- replicate(10000, sd_providers_test(ILEC$Time, CLEC$Time)) 
+f_stats <- replicate(10000, sd_providers_test(CLEC$Time, ILEC$Time)) 
 f_alts <- f_stats[1,]
 f_nulls <- f_stats[2,]
-
 ```
 
 ### c-ii. What is the 95% cutoff value according to the bootstrapped null values of F?
@@ -147,12 +156,13 @@ quantile(f_nulls, probs=0.95)
 ```{r fig.width = 6, fig.height = 4.5}
 plot(density(f_alts), lwd = 2, col = "blue", ylim = c(0,3), main = "Null and Alt distribution of F") 
 lines(density(f_nulls), lwd = 2, col = "red") 
-abline(v=quantile(f_nulls, probs=0.95), lwd = 2, lty="dotted") 
+abline(v=quantile(f_nulls, probs=0.95), lwd = 2, lty="dotted")
+legend("topright", legend=c("f_alts", "f_null"),col=c("blue", "red"), lty=1:2, cex=1.8, box.lty=0)
 ```
 
 ### c-iv. What do the bootstrap results suggest about the null hypothesis?
 
-- Answer:
+- Answer: We should reject H~null~.
 
 # Question 3 Let’s try to see when we should use the non-parametric bootstrap and when we might be better off with traditional statistical approaches.
 ## a.
@@ -163,13 +173,15 @@ norm_qq_plot <- function(values) {
   q_vals <- quantile(values, probs=probs1000)
   ?qnorm
   q_norm <- qnorm(probs1000, mean = mean(values), sd = sd(values))
-   plot(q_norm, q_vals, xlab="normal quantiles", ylab="values quantiles",ylim = c(0,60), xlim = c(0,60))
+   plot(q_norm, q_vals, xlab="normal quantiles", ylab="values quantiles")
    # a: y intercept, b: slope
    abline( a = 0, b = 1 , col="red", lwd=2)
 }
 ```
 
 ## b. Confirm that your function works by running it against the values of our d123 distribution from week 3 and checking that it looks like the plot on the right:
+
+- Ans: The points in the Q-Q plot form a relatively straight line since the quantiles of the dataset not match what the quantiles of the dataset would theoretically be.=, so the dataset was not normally distributed.
 
 ```{r fig.width = 6, fig.height = 4.5}
 set.seed(978234)
@@ -182,10 +194,18 @@ plot(density(d123))
 norm_qq_plot(d123)
 ```
 
-## c. We generally don’t need to use bootstrapping for hypothesis tests of the mean (t-tests) if the null distribution of the t-statistic follows a normal distribution (traditional statistics measures would work fine). Use your normal Q-Q plot function to check if the bootstrapped distribution of null t-values in question 1c was normally distributed. What’s your conclusion?
+## c. Based on 1-c
+- Answer: The bootstrapped distribution of null t-values in **question 1c was normally distributed**. Because the points in the Q-Q plot form a relatively straight line since the quantiles of the dataset nearly match what the quantiles of the dataset would theoretically be if the dataset was normally distributed.
 
-- Answer:
+```{r fig.width = 6, fig.height = 4.5}
+norm_qq_plot(boot_t_stats)
+```
 
 ## d. Hypothesis tests of variances (f-tests) assume the two samples we are comparing come from normally distributed populations. Use your normal Q-Q plot function to check if the two samples we compared in question 2 could have been normally distributed. What’s your conclusion?
 
-- Answer:
+- Answer: The two samples we compared in question 2 **are not normally distributed**.  Because the points in the Q-Q plot are not close to the straight red line.
+
+```{r fig.width = 6, fig.height = 4.5}
+norm_qq_plot(f_alts)
+norm_qq_plot(f_nulls)
+```
