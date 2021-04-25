@@ -10,59 +10,50 @@ bibliography: skeleton.bib
 link-citations: yes
 ---
 
-# Question 1
+# Question 1 Install the “manipulate” package
 
 i. Would this scenario create systematic or random error (or both or neither)?
 ii. Which part of the t-statistic or significance (diff, sd, n, alpha) would be affected?
 iii. Will it increase or decrease our power to reject the null hypothesis?
 iv. Which kind of error (Type I or Type II) becomes more likely because of this scenario?
 
-## a. You discover that your colleague wanted to target the general population of Taiwanese users of the product.  However, he only collected data from a pool of young consumers, and missed many older customers who you suspect might use the product much less every day.
-
-i.
-ii.
-iii.
-iv.
 ```{r }
 #install.packages('manipulate')
 #library(manipulate)
-
 ```
+
+## a. You discover that your colleague wanted to target the general population of Taiwanese users of the product.  However, he only collected data from a pool of young consumers, and missed many older customers who you suspect might use the product much less every day.
+
+i. Systematic error <br>
+ii. diff, sd <br>
+iii. decrease <br>
+iv. Type I <br>
 
 ## b. You find that 20 of the respondents are reporting data from the wrong wearable device, so they should be removed from the data. These 20 people are just like the others in every other respect.
 
-i.
-ii.
-iii.
-iv.
-```{r }
-
-```
+i. Random error <br>
+ii. n <br>
+iii. 1-$\beta$ decrease, decrease <br>
+iv. Type II <br>
 
 ## c. A very annoying professor visiting your company has criticized your colleague’s “95% confidence” criteria, and has suggested relaxing it to just 90%.
 
-i.
-ii.
-iii.
-iv.
-```{r }
-
-```
+i. Neither random error nor systematic error<br>
+ii. alpha <br>
+iii. It will not effect <br>
+iv. Type I <br>
 
 ## d. Your colleague has measured usage times on five weekdays and taken a daily average. But you feel this will underreport usage for younger people who are very active on weekends, whereas it over-reports usage of older users.
 
-i.
-ii.
-iii.
-iv.
-```{r }
-
-```
+i. Systematic error <br>
+ii. diff, sd <br>
+iii. 1-$\beta$ decrease, decrease <br>
+iv. Type II <br>
 
 # Question 2
 ## a.
 
-```{r }
+```{r fig.width = 7, fig.height = 5}
 library(readr)
 experiment <- read.csv(file = "study2Data.csv", header=TRUE)
 # getwd()
@@ -82,11 +73,14 @@ sd(BY_data$ACC)
 sd(RG_data$ACC)
 ```
 
-- Answer: According to the plot and descriptive statistics
-1.standard deviation of BY_data < standard deviation of RG_data
-2.mean of BY_data < mean of RG_data
-3.range of BY_data < range of RG_data
-4.the distribution of RG_data is more **disperse(separate)** than BY_data
+- Answer: According to the plot and descriptive statistics <br>
+1. standard deviation of BY_data < standard deviation of RG_data <br>
+
+2. mean of BY_data < mean of RG_data <br>
+
+3. range of BY_data < range of RG_data <br>
+
+4. the distribution of RG_data is more **disperse(separate)** than BY_data <br>
 
 ## b. blue-yellow accuracy
 
@@ -97,10 +91,10 @@ filter_Neutral_BY <- BY_data[BY_data$Emotion_Condition == "Neutral",]
 t.test(filter_Sadness_BY$ACC, filter_Neutral_BY$ACC, var.equal = FALSE, alt = "two.sided")
 ```
 
-- H0: the accuracy of sad and neutral participants are equal.
-- H1: the accuracy of sad and neutral participants are not equal.
-- p-value = 0.04309 < 0.05(95% confidence)
-- Reject H0, there is a significant difference in blue-yellow accuracy between sad and neutral participants.
+- H0: the accuracy of sad and neutral participants are equal. <br>
+- H1: the accuracy of sad and neutral participants are not equal. <br>
+- p-value = 0.04309 < 0.05(95% confidence) <br>
+- Reject H0, there is a significant difference in blue-yellow accuracy between sad and neutral participants. <br>
 
 ## c. red-green accuracy
 
@@ -110,21 +104,22 @@ filter_Neutral_RG <- RG_data[RG_data$Emotion_Condition == "Neutral",]
 t.test(filter_Sadness_RG$ACC, filter_Neutral_RG$ACC, var.equal = FALSE, alt = "two.sided")
 ```
 
-- H0: the accuracy of sad and neutral participants are equal.
-- H1: the accuracy of sad and neutral participants are not equal.
-- p-value = 0.3833 > 0.05(95% confidence)
-- Do not reject H0, there is not a significant difference in red-green accuracy between sad and neutral participants.
+- H0: the accuracy of sad and neutral participants are equal. <br>
+- H1: the accuracy of sad and neutral participants are not equal. <br>
+- p-value = 0.3833 > 0.05(95% confidence) <br>
+- Do not reject H0, there is not a significant difference in red-green accuracy between sad and neutral participants. <br>
 
 ## d. (not graded)Do the above t-tests support a claim that there is an interaction between emotion and color axis?
 
-- Answer: maybe yes, but it depends.
-- Based on (b) and (c), blue-yellow accuracy are significant difference in sad and neutral participants and this result support the claim. However, the red-green accuracy do not.
+- Answer: maybe yes, but it depends. <br>
+- Based on (b) and (c), blue-yellow accuracy are significant difference in sad and neutral participants and this result support the claim. However, the red-green accuracy do not. <br>
 
 ## e. Are any of these three factors (emotion/color-axis/interaction) possibly influencing color perception accuracy at any meaningful level of confidence?
 
 ```{r }
 all_data <- rbind(BY_data, RG_data)
-aov(formula = ACC ~ Axis + Emotion_Condition + Axis:Emotion_Condition, data=all_data)
+anova(aov(formula = ACC ~ Axis + Emotion_Condition + Axis:Emotion_Condition, data=all_data)
+)
 ```
 
-- Answer: 
+- Answer: the Signif. code of **Emotion_Condition** is '.', which means 0.05 ~ 0.1.
