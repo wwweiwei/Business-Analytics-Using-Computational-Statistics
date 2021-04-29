@@ -47,8 +47,8 @@ cos_sim_add_rank[1:5]
 
 2. Create a new function that automates the above functionality: it should take an accounts-bundles matrix as a parameter, and return a data object with the top 5 recommendations for each bundle in our data set, using cosine similarity.
 ```{r }
-get_top5 <- function (bundle_name) {
-  reg1 <- cos_sim[bundle_name,]
+get_top5 <- function (bundle_name,data) {
+  reg1 <- data[bundle_name,]
   reg2 <- reg1[order(reg1, decreasing = TRUE)]
   return (reg2[2:6]) ## top1-5, exclude itself(cos_sim==1)
 }
@@ -57,24 +57,52 @@ get_top5 <- function (bundle_name) {
 3. What are the top 5 recommendations for the bundle you chose to explore earlier?
 
 ```{r }
-get_top5("HeartStickerPack")
+get_top5("HeartStickerPack",cos_sim)
 ```
 
 - Answer: **HeartStickerPack** <br>
 -> Similar usage patterns: StickerLite, Emome, WordsStickerPack, HipsterChicSara, BlingStickerPack(by caculation) <br>
 Totally not same as what I guess in a-ii.<br>
 
-ii. Let’s create correlation based recommendations.
+ii. Let’s create **correlation** based recommendations.
 1. Reuse the function you created above (don’t change it; don’t use the cor() function)
 2. But this time give the function an accounts-bundles matrix where each 
-bundle (column) has already been mean-centered in advance.
+bundle (column) has already been **mean-centered** in advance.
 3. Now what are the top 5 recommendations for the bundle you chose to explore earlier?
 
-iii. Let’s create adjusted-cosine based recommendations.
+```{r }
+bundle_means <- apply(ac_bundles_matrix, 2, mean)
+bundle_means_matrix <- t(replicate(nrow(ac_bundles_matrix), bundle_means))
+ac_bundles_mc_b <- ac_bundles_matrix - bundle_means_matrix
+row.names(ac_bundles_mc_b) <- row.names(ac_bundles_dt)
+cor_sim_2 <- cosine(ac_bundles_mc_b)
+get_top5("HeartStickerPack", cor_sim_2)
+```
+
+- Answer: **HeartStickerPack** <br>
+-> Similar usage patterns: StickerLite, WordsStickerPack, Emome, BlingStickerPack, HipsterChicSara  <br>
+The results are same as (b), however, the order is not same.<br>
+
+iii. Let’s create **adjusted-cosine** based recommendations.
 1. Reuse the function you created above (you should not have to change it)
 2. But this time give the function an accounts-bundles matrix where each 
 account (row) has already been mean-centered in advance.
 3. What are the top 5 recommendations for the bundle you chose to explore earlier?
+
+```{r }
+bundle_means <- apply(ac_bundles_matrix, 1, mean)
+bundle_means_matrix <- t(replicate(ncol(ac_bundles_matrix), bundle_means))
+install.packages("data.table")
+library(data.table)
+
+bundle_means_matrix_t <- as.data.frame(t(as.matrix(bundle_means_matrix)))
+bundle_means_matrix_t
+
+ac_bundles_mc_b <- ac_bundles_matrix - bundle_means_matrix_t
+row.names(ac_bundles_mc_b) <- row.names(ac_bundles_dt)
+cor_sim_3 <- cosine(ac_bundles_mc_b)
+get_top5("HeartStickerPack", cor_sim_3)
+```
 
 ## c. (not graded) Are the three sets of geometric recommendations similar in nature (theme/keywords) to the recommendations you picked earlier using your intuition alone? What reasons might explain why your computational geometric recommendation models produce different results from your intuition?
 ## d. (not graded) What do you think is the conceptual difference in cosine similarity, correlation, and adjusted-cosine?
