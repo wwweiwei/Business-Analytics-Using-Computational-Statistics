@@ -107,35 +107,11 @@ get_top5("HeartStickerPack", cor_sim_3)
 The results are same as (b), however, the order is not same.<br>
 
 ## c. (not graded) Are the three sets of geometric recommendations similar in nature (theme/keywords) to the recommendations you picked earlier using your intuition alone? What reasons might explain why your computational geometric recommendation models produce different results from your intuition?
-- Answer: No, because I just guess it by literal meaning, but we should calculate the similarity.
+- Answer: No, because I just guess it by literal meaning, but we should calculate the similarity. <br>
+
+
 ## d. (not graded) What do you think is the conceptual difference in cosine similarity, correlation, and adjusted-cosine?
 - Answer: <br>
   - **Cosine similarity** defined as the angular similarity between two vectors. angle 0 defines match and 90 otherwise. <br>
   - **correlation coefficient** defined as the covariance between two vectors divided by their standard deviations. <br>
   - **adjusted-cosine** is very much similar to pearson similarity except if two are calculated over different set of rated vectors.
-
-# Question 2 Correlation is at the heart of many data analytic methods so let’s explore it further.
-
-## a. Create a horizontal set of random points, with a relatively narrow but flat distribution.
-i. What raw slope of x and y would you generally expect?
-ii.What is the correlation of x and y that you would generally expect?
-## b. Create a completely random set of points to fill the entire plotting area, along both x-axis and y-axis
-i.What raw slope of the x and y would you generally expect?
-ii. What is the correlation of x and y that you would generally expect?
-## c. Create a diagonal set of random points trending upwards at 45 degrees
-i. What raw slope of the x and y would you generally expect? (note that x, y have the same scale)
-ii. What is the correlation of x and y that you would generally expect?
-## d. Create a diagonal set of random trending downwards at 45 degrees
-i. What raw slope of the x and y would you generally expect? (note that x, y have the same scale)
-ii. What is the correlation of x and y that you would generally expect?
-## e. Apart from any of the above scenarios, find another pattern of data points with no correlation (r ≈ 0).  
-(optionally: can create a pattern that visually suggests a strong relationship but produces r ≈ 0?)
-## f. Apart from any of the above scenarios, find another pattern of data points with perfect correlation (r ≈ 1).
-(optionally: can you find a scenario where the pattern visually suggests a different relationship?)
-## g. Let’s see how correlation relates to simple regression, by simulating any linear relationship you wish:
-i. Run the simulation and record the points you create: pts <- interactive_regression() 
-ii. Use the lm() function to estimate the regression intercept and slope of pts to ensure they are the same as the values reported in the simulation plot: summary( lm( pts$y ~ pts$x ))
-iii. Estimate the correlation of x and y to see it is the same as reported in the plot: cor(pts)
-iv. Now, re-estimate the regression using standardized values of both x and y from pts
-v. What is the relationship between correlation and the standardized simple-regression estimates?
-
