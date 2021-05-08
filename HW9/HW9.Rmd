@@ -1,0 +1,173 @@
+---
+title: "BACS HW (Week11)"
+author: "106070038"
+date: "`r Sys.Date()`"
+output:
+  tufte::tufte_handout:
+    citation_package: natbib
+    latex_engine: xelatex
+bibliography: skeleton.bib
+link-citations: yes
+---
+
+# Question 1 Model fit is often determined by R2 so let’s dig into what this perspective of model fit is all about.
+
+## a. Let’s dig into what regression is doing to compute model fit:
+i. Plot Scenario 2, storing the returned points
+
+```{r }
+plot_regr_rsq <- function(points) {
+  max_x <- 50
+  if (nrow(points) == 0) {
+    plot(NA, xlim=c(-5,max_x), ylim=c(-5,max_x), xlab="x", ylab="y")
+    return()
+  }
+  plot(points, xlim=c(-5,max_x), ylim=c(-5,max_x), pch=19, cex=2, col="gray")
+  if (nrow(points) < 2) return()
+  
+  mean_x <- mean(points$x)
+  mean_y <- mean(points$y)
+  segments(0, mean_y, max_x, mean_y, lwd=1, col="lightgray", lty="dotted")
+  segments(mean_x, 0, mean_x, mean_y, lwd=1, col="lightgray", lty="dotted")
+  regr <- lm(points$y ~ points$x)
+  abline(regr, lwd=2, col="cornflowerblue")
+  
+  regr_summary <- summary(regr)
+  ssr <- sum((regr$fitted.values - mean(points$y))^2)
+  sse <- sum((points$y - regr$fitted.values)^2)
+  sst <- sum((points$y - mean(points$y))^2)
+  
+  par(family="mono")
+  legend("topleft", legend = c(
+    paste(" Raw intercept: ", round(regr$coefficients[1], 2), "\n",
+          "Raw slope    : ", round(regr$coefficients[2], 2), "\n",
+          "Correlation  : ", round(cor(points$x, points$y), 2), "\n",
+          "SSR          : ", round(ssr, 2), "\n",
+          "SSE          : ", round(sse, 2), "\n",
+          "SST          : ", round(sst, 2), "\n",
+          "R-squared    : ", round(regr_summary$r.squared, 2))),
+    bty="n")
+  par(family="sans")
+}
+
+interactive_regression_rsq <- function(points=data.frame()) {
+  cat("Click on the plot to create data points; hit [esc] to stop")
+  repeat {
+    plot_regr_rsq(points)
+    click_loc <- locator(1)
+    if (is.null(click_loc)) break
+    if(nrow(points) == 0 ) {
+      points <- data.frame(x=click_loc$x, y=click_loc$y)
+    } else {
+      points <- rbind(points, c(click_loc$x, click_loc$y))
+    }
+  }
+  return(points)
+}
+
+# pts <- interactive_regression_rsq()
+# save(pts, file='/Users/nkust/Desktop/2021Spring_Courses/BACS/HW9/pts.Rda')
+```
+
+![pts plot](/Users/nkust/Desktop/2021Spring_Courses/BACS/HW9/image_1)
+
+ii. Run a linear model of x and y points to confirm the R2 value reported by the simulation
+```{r }
+load('/Users/nkust/Desktop/2021Spring_Courses/BACS/HW9/pts.Rda')
+regr <- lm(y ~ x, data=pts)
+summary(regr)
+```
+
+iii. Add line segments to the plot to show the regression residuals (errors)
+```{r }
+y_hat <- regr$fitted.values
+# segments(pts$x, pts$y, pts$x, y_hat, col="red", lty="dotted")
+```
+
+![pts plot with line segments](/Users/nkust/Desktop/2021Spring_Courses/BACS/HW9/image_2)
+
+
+
+iv. Use only pts$x, pts$y, y_hat and mean(pts$y) to compute SSE, SSR and SST, and verify R2 
+```{r }
+SSE <- sum((y_hat - mean(pts$y))^2)
+SSE
+SSR <- sum((pts$y - y_hat)^2)
+SSR
+SST <- SSE + SSR
+SST
+R_square <- 1 - (SSR/(SSE + SSR))
+R_square
+## verify
+summary(regr)$r.square 
+```
+
+## b.Comparing scenarios 1 and 2, which do we expect to have a stronger R2 ?
+- Ans: Scenario 1, because Scenarios 1 is more intensive and close to the line than Scenario 2.
+
+## c. Comparing scenarios 3 and 4, which do we expect to have a stronger R2 ?
+- Ans: Scenario 3, because Scenarios 3 is more intensive and close to the line than Scenario 4.
+
+## d. Comparing scenarios 1 and 2, which do we expect has bigger/smaller SSE, SSR, and SST? (do not compute SSE/SSR/SST here – just provide your intuition)
+- Ans:
+  - SSE: Scenario 1 < Scenario 2 <br>
+  - SSR: Scenario 1 > Scenario 2 <br>
+  - SST: Scenario 1 $\approx$ Scenario 2 <br>
+
+## e. Comparing scenarios 3 and 4, which do we expect has bigger/smaller SSE, SSR, and SST? (do not compute SSE/SSR/SST here – just provide your intuition)
+- Ans:
+  - SSE: Scenario 3 < Scenario 4 <br>
+  - SSR: Scenario 3 < Scenario 4 <br>
+  - SST: Scenario 3 < Scenario 4 <br>
+
+# Question 2 We’re going to take a look back at the early heady days of global car manufacturing, when American, Japanese, and European cars competed to rule the world. Take a look at the data set in file auto-data.txt. We are interested in explaining what kind of cars have higher fuel efficiency (mpg).
+
+```{r }
+auto <- read.table("auto-data.txt", header=FALSE, na.strings = "?")
+names(auto) <- c("mpg", "cylinders", "displacement", "horsepower", "weight", "acceleration", "model_year", "origin", "car_name")
+```
+
+## a.
+i. Visualize the data in any way you feel relevant
+```{r }
+summary(auto)
+plot(auto)
+```
+
+ii. Report a correlation table of all variables, rounding to two decimal places
+```{r }
+cor <- cor(auto[-9], use="pairwise.complete.obs")
+round(cor,2)
+```
+
+iii. From the visualizations and correlations, which variables seem to relate to mpg? <br>
+```{r }
+cor(auto[1], auto[-9], use="pairwise.complete.obs")
+```
+- Ans: displacement(-0.8042028) and weight(-0.8317409) <br>
+
+iv. Which relationships might not be linear? (don’t worry about linearity for rest of this HW) <br>
+```{r }
+plot(auto[1])
+```
+- Ans: Based on the correlation plot, most of the relationships with model_year are not linear.<br>
+
+v. Are there any pairs of independent variables that are highly correlated (r > 0.7)? <br>
+```{r }
+summary(auto[-9])
+```
+- Ans: <br>
+
+
+## b. Let’s create a linear regression model where mpg is dependent upon all other suitable variables (Note: origin is categorical with three levels, so use factor(origin) in lm(...)  to split it into two dummy variables)
+i. Which independent variables have a ‘significant’ relationship with mpg at 1% significance?
+```{r }
+
+```
+
+ii. Looking at the coefficients, is it possible to determine which independent variables are the most effective at increasing mpg? If so, which ones, and if not, why not? (hint: units!)
+
+## c.
+```{r }
+
+```
