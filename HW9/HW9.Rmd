@@ -79,14 +79,12 @@ summary(regr)
 ```
 
 iii. Add line segments to the plot to show the regression residuals (errors)
+![pts plot with line segments](/Users/nkust/Desktop/2021Spring_Courses/BACS/HW9/image_2)
+
 ```{r }
 y_hat <- regr$fitted.values
 # segments(pts$x, pts$y, pts$x, y_hat, col="red", lty="dotted")
 ```
-
-![pts plot with line segments](/Users/nkust/Desktop/2021Spring_Courses/BACS/HW9/image_2)
-
-
 
 iv. Use only pts$x, pts$y, y_hat and mean(pts$y) to compute SSE, SSR and SST, and verify R2 
 ```{r }
@@ -129,7 +127,7 @@ names(auto) <- c("mpg", "cylinders", "displacement", "horsepower", "weight", "ac
 
 ## a.
 i. Visualize the data in any way you feel relevant
-```{r }
+```{r fig.height = 6, fig.width = 6}
 summary(auto)
 plot(auto)
 ```
@@ -147,27 +145,59 @@ cor(auto[1], auto[-9], use="pairwise.complete.obs")
 - Ans: displacement(-0.8042028) and weight(-0.8317409) <br>
 
 iv. Which relationships might not be linear? (don’t worry about linearity for rest of this HW) <br>
-```{r }
-plot(auto[1])
-```
+
 - Ans: Based on the correlation plot, most of the relationships with model_year are not linear.<br>
 
 v. Are there any pairs of independent variables that are highly correlated (r > 0.7)? <br>
-```{r }
-summary(auto[-9])
-```
-- Ans: <br>
+
+- Ans: cylinders-displacement(0.95), cylinders-horsepower(0.84), cylinders-weight(0.90),  displacement-horsepower(0.90), displacement-weight(0.93), horsepower-weight(0.86) <br>
 
 
 ## b. Let’s create a linear regression model where mpg is dependent upon all other suitable variables (Note: origin is categorical with three levels, so use factor(origin) in lm(...)  to split it into two dummy variables)
 i. Which independent variables have a ‘significant’ relationship with mpg at 1% significance?
 ```{r }
-
+auto$origin <- factor(auto$origin)
+auto <- auto[-9]
+regr <- lm(auto$mpg ~ auto$cylinders + auto$displacement + auto$horsepower + auto$weight + auto$acceleration + auto$model_year + auto$origin , data = auto) 
+summary(regr)
 ```
 
-ii. Looking at the coefficients, is it possible to determine which independent variables are the most effective at increasing mpg? If so, which ones, and if not, why not? (hint: units!)
+- Ans: displacement <br>
 
-## c.
+ii. Looking at the coefficients, is it possible to determine which independent variables are the most effective at increasing mpg? If so, which ones, and if not, why not? (hint: units!) <br>
+
+- Ans: model_year, because the Estimate of model_year is biggest(7.770e-01)<br>
+
+## c.Let’s try to resolve some of the issues with our regression model above
+
+i. Create fully standardized regression results: are these slopes easier to compare?<br>
+
 ```{r }
-
+auto_std <- data.frame(scale(auto[-8]))
+auto_std_regr <- lm(mpg ~ cylinders + displacement + horsepower + weight + acceleration + model_year , data = auto_std) 
+summary(auto_std_regr)
 ```
+
+ii. Regress mpg over each nonsignificant independent variable, individually.
+Which ones become significant when we regress mpg over them individually? <br>
+- nonsignificant independent variable: cylinders, displacement, horsepower, acceleration
+```{r }
+auto_std_regr_cylinders <- lm(mpg ~ cylinders , data = auto_std) 
+summary(auto_std_regr_cylinders)
+auto_std_regr_displacement <- lm(mpg ~ displacement , data = auto_std) 
+summary(auto_std_regr_displacement)
+auto_std_regr_horsepower <- lm(mpg ~ horsepower , data = auto_std) 
+summary(auto_std_regr_horsepower)
+auto_std_regr_acceleration <- lm(mpg ~ acceleration , data = auto_std) 
+summary(auto_std_regr_acceleration)
+```
+- Ans: all become significant when we regress mpg over them individually (cylinders, displacement, horsepower, acceleration) <br>
+
+iii. Plot the density of the residuals: are they normally distributed and centered around zero? <br>
+
+```{r fig.height = 4, fig.width = 6}
+plot(density(regr$residuals), main = "Density plot of residuals")
+abline(v = mean(regr$residuals), col="red")
+```
+
+- Ans: not normally distributed, but it is centered around zero
