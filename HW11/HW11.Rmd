@@ -1,0 +1,105 @@
+---
+title: "BACS HW (Week13)"
+author: "106070038"
+date: "`r Sys.Date()`"
+output:
+  tufte::tufte_handout:
+    citation_package: natbib
+    latex_engine: xelatex
+bibliography: skeleton.bib
+link-citations: yes
+---
+
+# Question 1 Let’s visualize how weight and acceleration are related to mpg.
+## a. Let’s visualize how weight might moderate the relationship between acceleration and mpg
+
+```{r }
+# install.packages("logr")
+library(logr)
+
+cars <- read.table("auto-data.txt",)
+names(cars) <- c("mpg", "cylinders", "displacement", "horsepower", "weight", "acceleration", "model_year","origin", "car_name")
+
+cars_log <- with(cars, data.frame(log(mpg), log(weight), log(acceleration), model_year, origin))
+
+# calculate the mean of log.weight.
+mean_log_weight <- mean(cars_log$log.weight.)
+
+# subset cars dataset by mean weight
+cars_light <- subset(cars_log, log.weight. < mean_log_weight) 
+cars_heavy <- subset(cars_log, log.weight. > mean_log_weight) 
+
+# separate regressions of acceleration vs. mpg by mean weight
+acc_regr_light <- lm(log.mpg. ~ log.acceleration., data=cars_light) 
+acc_regr_heavy <- lm(log.mpg. ~ log.acceleration., data=cars_heavy) 
+
+# plot the points
+with(cars_light, plot(log.acceleration., log.mpg., pch=1, col ="blue", lwd=1, main = "Effect of acceleration on mpg depends on weight of car"))
+with(cars_heavy, points(log.acceleration., log.mpg., pch=8, col ="red", lwd=1))
+
+# plot separate regression lines colorized by origin
+abline(acc_regr_light, col = "blue", lwd=2, lty=1) 
+abline(acc_regr_heavy, col = "red", lwd=2, lty=2) 
+```
+
+## b. Report the full summaries of two separate regressions for light and heavy cars where log.mpg. is dependent on log.weight., log.acceleration., model_year and origin
+
+```{r }
+regr_light <- lm(log.mpg. ~ ., data = cars_light) 
+summary(regr_light)
+
+abline(regr_light, col = "blue", lwd=2, lty=1) 
+
+regr_heavy <- lm(log.mpg. ~ ., data = cars_heavy) 
+summary(regr_heavy)
+```
+
+## c. (not graded) Using your intuition only: What do you observe about light versus heavy cars so far?
+
+- Answer: <br>
+  - heavy car(0.7556) has bigger R-squared than light car(0.7048) <br>
+  - the effect of origin in linear model in heavy car is more significant than in light car<br>
+
+# Question 2 Using the fully transformed dataset from above (cars_log), to test whether we have moderation.
+
+## a. (not graded) Between weight and acceleration ability, use your intuition and experience to state which variable might be a moderating versus independent variable, in affecting mileage.
+
+- Answer: I think is **weight**, because weight is more significant than acceleration in Question 1 <br>
+
+## b. Use various regression models to model the possible moderation on log.mpg.:
+
+## i. Report a regression without any interaction terms
+```{r }
+summary(lm(log.mpg. ~ log.weight. + log.acceleration., data=cars_log))
+```
+
+## ii. Report a regression with an interaction between weight and acceleration
+```{r }
+cor(cars_log$log.weight., cars_log$log.weight.*cars_log$log.acceleration.)
+summary(lm(log.mpg. ~ log.weight. + log.acceleration. + log.weight.*log.acceleration., data=cars_log))
+```
+
+## iii. Report a regression with a mean-centered interaction term
+```{r }
+weight_mc <- scale(cars_log$log.weight., center=TRUE, scale=FALSE) 
+acceleration_mc <- scale(cars_log$log.acceleration., center=TRUE, scale=FALSE)
+
+cor(weight_mc, weight_mc*acceleration_mc)
+summary(lm(log.mpg. ~ weight_mc + acceleration_mc + weight_mc*acceleration_mc, data = cars_log))
+```
+## iv. Report a regression with an orthogonalized interaction term
+```{r }
+wei_x_acc <- cars_log$log.weight. * cars_log$log.acceleration.
+interaction_regr <- lm(wei_x_acc ~ cars_log$log.weight. + cars_log$log.acceleration.) 
+interaction_ortho <- interaction_regr$residuals
+
+round(cor(cbind(cars_log, interaction_ortho)), 2)
+
+summary(lm(log.mpg. ~ cars_log$log.weight. + cars_log$log.acceleration. + interaction_ortho, data = cars_log))
+```
+
+## c. For each of the interaction term strategies above (raw, mean-centered, orthogonalized) what is the correlation between that interaction term and the two variables that you multiplied together?
+- Answer: <br>
+  - raw <br>
+  - mean-centered <br>
+  - orthogonalized <br>
