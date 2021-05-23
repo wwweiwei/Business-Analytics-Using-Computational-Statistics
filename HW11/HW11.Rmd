@@ -13,12 +13,13 @@ link-citations: yes
 # Question 1 Let’s visualize how weight and acceleration are related to mpg.
 ## a. Let’s visualize how weight might moderate the relationship between acceleration and mpg
 
-```{r }
+```{r fig.height = 4, fig.width = 6}
 # install.packages("logr")
 library(logr)
 
 cars <- read.table("auto-data.txt",)
-names(cars) <- c("mpg", "cylinders", "displacement", "horsepower", "weight", "acceleration", "model_year","origin", "car_name")
+names(cars) <- c("mpg", "cylinders", "displacement", "horsepower", "weight", "acceleration",
+              "model_year","origin", "car_name")
 
 cars_log <- with(cars, data.frame(log(mpg), log(weight), log(acceleration), model_year, origin))
 
@@ -34,7 +35,8 @@ acc_regr_light <- lm(log.mpg. ~ log.acceleration., data=cars_light)
 acc_regr_heavy <- lm(log.mpg. ~ log.acceleration., data=cars_heavy) 
 
 # plot the points
-with(cars_light, plot(log.acceleration., log.mpg., pch=1, col ="blue", lwd=1, main = "Effect of acceleration on mpg depends on weight of car"))
+with(cars_light, plot(log.acceleration., log.mpg., pch=1, col ="blue", lwd=1,
+                      main = "Effect of acceleration on mpg depends on weight of car"))
 with(cars_heavy, points(log.acceleration., log.mpg., pch=8, col ="red", lwd=1))
 
 # plot separate regression lines colorized by origin
@@ -47,8 +49,6 @@ abline(acc_regr_heavy, col = "red", lwd=2, lty=2)
 ```{r }
 regr_light <- lm(log.mpg. ~ ., data = cars_light) 
 summary(regr_light)
-
-abline(regr_light, col = "blue", lwd=2, lty=1) 
 
 regr_heavy <- lm(log.mpg. ~ ., data = cars_heavy) 
 summary(regr_heavy)
@@ -64,7 +64,7 @@ summary(regr_heavy)
 
 ## a. (not graded) Between weight and acceleration ability, use your intuition and experience to state which variable might be a moderating versus independent variable, in affecting mileage.
 
-- Answer: I think is **weight**, because weight is more significant than acceleration in Question 1 <br>
+- Answer: I think is **weight**. <br>
 
 ## b. Use various regression models to model the possible moderation on log.mpg.:
 
@@ -95,11 +95,27 @@ interaction_ortho <- interaction_regr$residuals
 
 round(cor(cbind(cars_log, interaction_ortho)), 2)
 
-summary(lm(log.mpg. ~ cars_log$log.weight. + cars_log$log.acceleration. + interaction_ortho, data = cars_log))
+summary(lm(log.mpg. ~ cars_log$log.weight. + cars_log$log.acceleration. 
+           + interaction_ortho, data = cars_log))
 ```
 
 ## c. For each of the interaction term strategies above (raw, mean-centered, orthogonalized) what is the correlation between that interaction term and the two variables that you multiplied together?
-- Answer: <br>
-  - raw <br>
-  - mean-centered <br>
-  - orthogonalized <br>
+## Raw
+```{r }
+cor(cars_log$log.weight., cars_log$log.weight.*cars_log$log.acceleration.)
+cor(cars_log$log.acceleration., cars_log$log.weight.*cars_log$log.acceleration.)
+```
+- Answer: **log.weight.** is the moderator. The effect of log.acceleration. is contingent on log.weight..<br>
+
+## Mean-centered
+```{r }
+cor(acceleration_mc, weight_mc*acceleration_mc)
+cor(weight_mc, weight_mc*acceleration_mc)
+```
+- Answer: Correlation isn't effected by centering. As a result, the correlation is **same as raw**.<br>
+  
+## Orthogonalized
+```{r }
+round(cor(cbind(cars_log, interaction_ortho)), 2)
+```
+- Answer: The correlation between interaction_ortho and log.weight. is 0. And, the correlation between interaction_ortho and log.acceleration. is also 0. <br>
