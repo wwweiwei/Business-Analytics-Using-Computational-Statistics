@@ -1,0 +1,163 @@
+---
+title: "BACS HW (Week14)"
+author: "106070038"
+date: "`r Sys.Date()`"
+output:
+  tufte::tufte_handout:
+    citation_package: natbib
+    latex_engine: xelatex
+bibliography: skeleton.bib
+link-citations: yes
+---
+
+# Question 1 In the cars dataset, we saw that the number of cylinders does not seem to directly influence mpg when car weight is also considered.  But might cylinders have an indirect relationship with mpg through its weight? 
+Let’s check whether weight mediates the relationship between cylinders and mpg, even when other factors are controlled for.  Use log.mpg., log.weight., and log.cylinders as your main variables, and keep log.acceleration., model_year, and origin as control variables (see gray variables in diagram).
+
+## a. Let’s try computing the direct effects first:
+
+```{r }
+install.packages("logr")
+library(logr)
+cars <- read.table("auto-data.txt")
+names(cars) <- c("mpg", "cylinders", "displacement", "horsepower", "weight", "acceleration", "model_year","origin", "car_name")
+head(cars, 6)
+cars$horsepower <- as.numeric(cars$horsepower)
+cars <- na.omit(cars)
+cars_log <- with(cars, data.frame(log(mpg), log(cylinders), log(displacement), log(horsepower), log(weight), log(acceleration), model_year, origin))
+head(cars_log, 6)
+```
+
+i. Model 1: Regress log.weight. over log.cylinders. only and report the coefficient
+(check whether number of cylinders has a significant direct effect on weight)<br>
+```{r }
+regr_model1 <- lm(log.weight. ~ log.cylinders.  , data = cars_log)
+summary(regr_model1)
+```
+
+ii. Model 2: Regress log.mpg. over log.weight. and all control variables and report the coefficient (check whether weight has a significant direct effect on mpg with other variables statistically controlled?)
+```{r }
+regr_model2 <- lm(log.mpg. ~ log.weight.  , data = cars_log)
+summary(regr_model2)
+```
+
+## b. What is the indirect effect of cylinders on mpg?
+```{r }
+regr_both <- lm(log.mpg. ~ log.weight. + log.cylinders.  , data = cars_log)
+summary(regr_both)
+```
+
+- Answer: Because log.weight. has bigger estimate, it is more significance affecting log.mpg. than log.cylinders., so cylinders is the indirect factor. <br>
+
+## c. Let’s bootstrap for the confidence interval of the indirect effect of cylinders on mpg
+i. Bootstrap (estimating regression models 1 & 2 each time) to get indirect effects:
+what is its 95% CI of the indirect effect of log.cylinders. on log.mpg.?
+
+```{r }
+set.seed(1)
+boot_mediation <- function(model1, model2, dataset) { 
+  boot_index <- sample(1:nrow(dataset), replace=TRUE) 
+  data_boot <- dataset[boot_index, ]
+  regr1 <- lm(model1, data_boot)
+  regr2 <- lm(model2, data_boot)
+  return(regr1$coefficients[2] * regr2$coefficients[2]) 
+}
+indirect <- replicate(2000, boot_mediation(regr_model1, regr_model2, cars_log))
+quantile(indirect, probs=c(0.025, 0.975))
+```
+
+# Question 2 Let’s revisit the issue of multicollinearity of main effects (between cylinders, displacement, horsepower, and weight) we saw in the cars dataset. Start by recreating the cars_log dataset, which log-transforms all variables except model year and origin.
+Important: remove any rows that have missing values.
+## a. Let’s analyze the principal components of the four collinear variables
+i. Create a new data.frame of the four log-transformed variables with high multicollinearity
+(Give this smaller data frame an appropriate name – what might they jointly mean?)
+```{r }
+new_cars_log <- cbind(cars_log['log.cylinders.'], cars_log['log.displacement.']) 
+new_cars_log <- cbind(new_cars_log, cars_log['log.horsepower.']) 
+new_cars_log <- cbind(new_cars_log, cars_log['log.weight.']) 
+new_cars_log
+```
+ii. How much variance of the four variables is explained by their first principal component?
+(a summary of the pca reports it, but try computing this from the eigenvalues alone)
+```{r fig.height = 4, fig.width = 6}
+round( cor(new_cars_log), 2)
+cars_log_pca <- prcomp(new_cars_log, scale. = FALSE)
+cars_log_pca
+biplot(cars_log_pca)
+scores = cars_log_pca$x
+summary(cars_log_pca)
+```
+iii. Looking at the values and valence (positive/negative) of the first principal component’s eigenvector, what would you call the information captured by this component?
+- Answer: The standard deviation of PC1 is 1.9072, and the values od PC1: log.mpg.= 0.4924630 (Positive), log.displacement.= -0.5054964 (Negative), log.horsepower.= -0.4941301 (Negative), log.weight.= -0.5077293 (Negative) <br>
+- It means that log.mpg. has positive effect toward PC1 and others have negative effects. <br>
+
+## b. Let’s revisit our regression analysis on cars_log:
+i. Store the scores of the first principal component as a new column of cars_log
+cars_log$new_column_name <- ...scores of PC1…
+```{r }
+PC1 <- cars_log_pca$x
+PC1 <- PC1[,1]
+cars_log$PC1 <- PC1
+cars_log
+```
+
+ii. Regress mpg over the the column with PC1 scores (replaces cylinders, displacement, horsepower, and weight), as well as acceleration, model_year and origin
+```{r }
+regr_pc1 <- lm(log.mpg. ~ PC1  , data = cars_log)
+summary(regr_pc1)
+```
+
+iii. Try running the regression again over the same independent variables, but this time with everything standardized. How important is this new column relative to other columns?
+```{r }
+cars_log_pca_stand <- prcomp(new_cars_log, scale. = TRUE)
+cars_log_pca_stand
+biplot(cars_log_pca_stand)
+scores = cars_log_pca_stand$x
+summary(cars_log_pca_stand)
+PC1_stand <- cars_log_pca_stand$x
+PC1_stand <- PC1_stand[,1]
+cars_log$PC1_stand <- PC1_stand
+cars_log
+regr_pc1_stand_onlypc1 <- lm(log.mpg. ~ PC1_stand , data = cars_log)
+summary(regr_pc1_stand_onlypc1)
+```
+
+- The estimator before standardized: 0.167457 <br>
+- The estimator after standardized: 0.157612 <br>
+
+# Question 3 Please download the Excel data file security_questions.xlsx from Canvas. In your analysis, you can either try to read the data sheet from the Excel file directly from R (there might be a package for that!) or you can try to export the data sheet to a CSV file before reading it into R.
+
+```{r }
+# install.packages('readxl')
+library('readxl')
+security_questions <- read_excel("security_questions.xlsx", sheet = "data")
+```
+
+## a. How much variance did each extracted factor explain?
+```{r }
+eigen(cor(security_questions))
+```
+- Answer: <br>
+  - **Vector** is the direction of variance. <br>
+  - **Value** is the variance captured by PC. <br>
+
+## b. How many dimensions would you retain, according to the criteria we discussed?
+(show a single visualization with scree plot of data, scree plot of noise, eigenvalue = 1 cutoff) <br>
+
+i. Eigenvalues ≥ 1 <br>
+```{r }
+eigen(cor(security_questions))$values
+```
+
+ii. Scree plot <br>
+```{r fig.height = 4, fig.width = 6}
+dec_pca <- prcomp(security_questions, scale. = FALSE)
+screeplot(dec_pca, type="lines")
+```
+## c. (ungraded) Can you interpret what any of the principal components mean? 
+Try guessing the meaning of the first two or three PCs looking at the PC-vs-variable matrix <br>
+- Answer: According to the matrix below, Q8 and Q16 dominate the biggest part of PC1, because they have biggest values in PC1. <br>
+
+```{r }
+biplot(dec_pca)
+dec_pca
+```
