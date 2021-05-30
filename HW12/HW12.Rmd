@@ -16,14 +16,16 @@ Let’s check whether weight mediates the relationship between cylinders and mpg
 ## a. Let’s try computing the direct effects first:
 
 ```{r }
-install.packages("logr")
+# install.packages("logr")
 library(logr)
 cars <- read.table("auto-data.txt")
-names(cars) <- c("mpg", "cylinders", "displacement", "horsepower", "weight", "acceleration", "model_year","origin", "car_name")
+names(cars) <- c("mpg", "cylinders", "displacement", "horsepower", "weight",
+                 "acceleration", "model_year","origin", "car_name")
 head(cars, 6)
 cars$horsepower <- as.numeric(cars$horsepower)
 cars <- na.omit(cars)
-cars_log <- with(cars, data.frame(log(mpg), log(cylinders), log(displacement), log(horsepower), log(weight), log(acceleration), model_year, origin))
+cars_log <- with(cars, data.frame(log(mpg), log(cylinders), log(displacement),
+                                  log(horsepower), log(weight), log(acceleration), model_year, origin))
 head(cars_log, 6)
 ```
 
@@ -74,7 +76,7 @@ i. Create a new data.frame of the four log-transformed variables with high multi
 new_cars_log <- cbind(cars_log['log.cylinders.'], cars_log['log.displacement.']) 
 new_cars_log <- cbind(new_cars_log, cars_log['log.horsepower.']) 
 new_cars_log <- cbind(new_cars_log, cars_log['log.weight.']) 
-new_cars_log
+# new_cars_log
 ```
 ii. How much variance of the four variables is explained by their first principal component?
 (a summary of the pca reports it, but try computing this from the eigenvalues alone)
@@ -82,7 +84,7 @@ ii. How much variance of the four variables is explained by their first principa
 round( cor(new_cars_log), 2)
 cars_log_pca <- prcomp(new_cars_log, scale. = FALSE)
 cars_log_pca
-biplot(cars_log_pca)
+# biplot(cars_log_pca)
 scores = cars_log_pca$x
 summary(cars_log_pca)
 ```
@@ -97,7 +99,7 @@ cars_log$new_column_name <- ...scores of PC1…
 PC1 <- cars_log_pca$x
 PC1 <- PC1[,1]
 cars_log$PC1 <- PC1
-cars_log
+# cars_log
 ```
 
 ii. Regress mpg over the the column with PC1 scores (replaces cylinders, displacement, horsepower, and weight), as well as acceleration, model_year and origin
@@ -116,7 +118,7 @@ summary(cars_log_pca_stand)
 PC1_stand <- cars_log_pca_stand$x
 PC1_stand <- PC1_stand[,1]
 cars_log$PC1_stand <- PC1_stand
-cars_log
+# cars_log
 regr_pc1_stand_onlypc1 <- lm(log.mpg. ~ PC1_stand , data = cars_log)
 summary(regr_pc1_stand_onlypc1)
 ```
@@ -149,10 +151,11 @@ eigen(cor(security_questions))$values
 ```
 
 ii. Scree plot <br>
-```{r fig.height = 4, fig.width = 6}
+```{r fig.height = 12, fig.width = 14}
 dec_pca <- prcomp(security_questions, scale. = FALSE)
 screeplot(dec_pca, type="lines")
 ```
+
 ## c. (ungraded) Can you interpret what any of the principal components mean? 
 Try guessing the meaning of the first two or three PCs looking at the PC-vs-variable matrix <br>
 - Answer: According to the matrix below, Q8 and Q16 dominate the biggest part of PC1, because they have biggest values in PC1. <br>
