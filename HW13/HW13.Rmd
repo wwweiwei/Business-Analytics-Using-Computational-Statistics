@@ -1,0 +1,158 @@
+---
+title: "BACS HW (Week15)"
+author: "106070038"
+date: "`r Sys.Date()`"
+output:
+  tufte::tufte_handout:
+    citation_package: natbib
+    latex_engine: xelatex
+bibliography: skeleton.bib
+link-citations: yes
+---
+
+Let’s reconsider the security questionnaire from last week, where consumers were asked security related questions about one of the e-commerce websites they had recently used.
+
+# Question 1 Earlier, we examined a dataset from a security survey send to customers of e-commerce websites. However, we only eigenvalue > 1 criteria and the screeplot to find a suitable number of components. Let’s perform a parallel analysis as well this week:
+
+```{r }
+# install.packages('readxl')
+library('readxl')
+security_questions <- read_excel("security_questions.xlsx", sheet = "data")
+head(security_questions)
+```
+
+## a. Show a single visualization with scree plot of data, scree plot of simulated noise, and a horizontal line showing the eigenvalue = 1 cutoff.
+
+missing: **scree plot of simulated noise**
+- visualization with scree plot of data
+```{r }
+pca <- prcomp(formula = ~.,  
+              data = security_questions,
+              scale = TRUE) 
+plot(pca, type="line",
+     main="Scree Plot for security questions")
+```
+- scree plot of simulated noise
+```{r }
+set.seed(1)
+eigen(cor(noise))$values
+
+## Function to run a PCA on n ⨉ p dataframe of random values
+sim_noise_ev <- function(n, p) {
+  noise <- data.frame(replicate(p, rnorm(n))) 
+  return( eigen(cor(noise))$values )
+}
+
+## Repeat this k times
+evalues_noise <- replicate(100, sim_noise_ev(33, 10))
+
+## Average each of the noise eigenvalues ev over k to produce ev
+evalues_mean <- apply(evalues_noise, 1, mean)
+dec_pca <- prcomp(security_questions, scale. = TRUE) 
+screeplot(dec_pca, type="lines", main="Eigenvalues: security_questions v.s noise") 
+lines(evalues_mean, type="blue") 
+abline(h=1, lty="dotted")
+```
+- a horizontal line showing the eigenvalue = 1 cutoff
+```{r }
+plot(pca, type="line",
+     main="Scree Plot for security questions")
+abline(h=1, col="blue") # Kaiser eigenvalue-greater-than-one rule
+```
+
+## b. How many dimensions would you retain if we used Parallel Analysis?
+- **Parallel Analysis**: Parallel analyis is an alternative technique that compares the scree of factors of the observed data with that of a random data matrix of the same size as the original. 
+
+```{r }
+# install.packages("psych")
+# library(psych)
+# fa.parallel(security_questions,n.obs=NULL,fm="minres",fa="both",nfactors=1, 
+# main="Parallel Analysis Scree Plots for security_questions",
+# n.iter=20,error.bars=FALSE,se.bars=FALSE,SMC=FALSE,ylabel=NULL,show.legend=TRUE,
+# sim=TRUE,quant=.95,cor="cor",use="pairwise",plot=TRUE,correct=.5)
+```
+
+- Answer: Based on (a), I will retain 2 dimensions.
+
+# Question 2 Earlier, we examined the eigenvectors of the security dataset. Now, let’s examine factor loadings (use the principal() method from the psych package)
+
+## a. Looking at the loadings of the first 3 principal components, to which components does each item seem to best belong?
+```{r }
+# install.packages("psych")
+library(psych)
+dec_pca3_orig <- principal(security_questions, nfactor=3, rotate="none", scores=TRUE)
+dec_pca3_orig$loadings
+```
+- Answer: <br>
+  - Loadings, which include magnitude and direction are easier to interpret than eigenvectors. λ > 0.70 is considered a good loading, more than half of item variance explained by PC. <br>
+  - As a result, PC1 belongs to Q1, Q14, Q18. <br>
+
+## b. How much of the total variance of the security dataset do the first 3 PCs capture?
+```{r }
+sum(dec_pca3_orig$loadings[,"PC1"]^2) + sum(dec_pca3_orig$loadings[,"PC2"]^2) + sum(dec_pca3_orig$loadings[,"PC3"]^2)
+```
+
+## c. Looking at commonality and uniqueness, which items are less than adequately explained by the first 3 principal components?
+- Commonality: variance of X100m explained by both principal components <br>
+- Uniqueness: Unexplained variance of X100m. u2 = 1 - Communality <br>
+- Answer: **Q17** <br>
+
+```{r }
+dec_pca3_orig[3]
+```
+
+## d. How many measurement items share similar loadings between 2 or more components?
+- Answer: <br>
+  - Q4 share similar loadings between PC1 and PC2.<br>
+  - Q5 share similar loadings between PC1 and PC3.<br>
+  - Q12 share similar loadings between PC1 and PC2.<br>
+  - Q17 share similar loadings between PC1 and PC2.<br>
+
+```{r }
+dec_pca3_orig[3]
+```
+
+## e. Can you distinguish a ‘meaning’ behind the first principal component from the items that load best upon it? (see the wording of the questions of those items)
+- Some infomation about site and positive meaning. <br>
+
+# Question 3 To improve interpretability of loadings, let’s rotate the our principal component axes to get rotated components (extract and rotate only three principal components)
+
+## a. Individually, does each rotated component (RC) explain the same, or different, amount of variance than the corresponding principal components (PCs)?
+- Answer: All are **different**. <br>
+```{r }
+dec_pca3_rotate <- principal(security_questions, nfactor=3, rotate="nane", scores=TRUE)
+dec_pca3_rotate$loadings
+```
+
+```{r }
+dec_pca3_rotate <- principal(security_questions, nfactor=3, rotate="varimax", scores=TRUE)
+dec_pca3_rotate$loadings
+```
+
+
+## b. Together, do the three rotated components explain the same, more, or less cumulative variance as the three principal components combined?
+- The **same**.
+
+## c. Looking back at the items that shared similar loadings with multiple principal components (#2d), do those items have more clearly differentiated loadings among rotated components?
+- Answer: <br>
+  - Q4 loadings between PC1 and PC2. -> same <br>
+  - Q5 loadings between PC1 and PC3. -> smaller <br>
+  - Q12 loadings between PC1 and PC2. -> bigger <br>
+  - Q17 loadings between PC1 and PC2. -> bigger <br>
+
+
+## d. Can you now interpret the “meaning” of the 3 rotated components from the items that load best upon each of them? (see the wording of the questions of those items)
+- PC1: some negative word, ex. never, remove, prevent. <br>
+- PC2: about "I", "my" and "mine". <br>
+- PC3: promise something, ex. make sure and provide me something to protect.
+
+## e. If we reduced the number of extracted and rotated components to 2, does the meaning of our rotated components change?
+- Yes, it will definitely change.<br>
+
+```{r }
+dec_pca2_rotate <- principal(security_questions, nfactor=2, rotate="varimax", scores=TRUE)
+dec_pca2_rotate$loadings
+```
+
+## (ungraded) Looking back at all our results and analyses of this dataset (from this week and previous), how many components (1-3) do you believe we should extract and analyze to understand the security dataset? Feel free to suggest different answers for different purposes.
+- Answer: **one**,the loading gap between PC1 and PC2 is quite large no matter which approach.
