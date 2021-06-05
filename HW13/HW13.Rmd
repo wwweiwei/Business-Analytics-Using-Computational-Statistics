@@ -23,19 +23,18 @@ head(security_questions)
 
 ## a. Show a single visualization with scree plot of data, scree plot of simulated noise, and a horizontal line showing the eigenvalue = 1 cutoff.
 
-missing: **scree plot of simulated noise**
-- visualization with scree plot of data
-```{r }
+- **visualization with scree plot of data**
+```{r fig.height = 4, fig.width = 6}
 pca <- prcomp(formula = ~.,  
               data = security_questions,
               scale = TRUE) 
 plot(pca, type="line",
      main="Scree Plot for security questions")
 ```
-- scree plot of simulated noise
-```{r }
+
+- **scree plot of simulated noise**
+```{r fig.height = 4, fig.width = 6}
 set.seed(1)
-eigen(cor(noise))$values
 
 ## Function to run a PCA on n ⨉ p dataframe of random values
 sim_noise_ev <- function(n, p) {
@@ -53,15 +52,18 @@ screeplot(dec_pca, type="lines", main="Eigenvalues: security_questions v.s noise
 lines(evalues_mean, type="blue") 
 abline(h=1, lty="dotted")
 ```
-- a horizontal line showing the eigenvalue = 1 cutoff
-```{r }
+
+- **a horizontal line showing the eigenvalue = 1 cutoff**
+```{r fig.height = 4, fig.width = 6}
 plot(pca, type="line",
      main="Scree Plot for security questions")
 abline(h=1, col="blue") # Kaiser eigenvalue-greater-than-one rule
 ```
 
 ## b. How many dimensions would you retain if we used Parallel Analysis?
-- **Parallel Analysis**: Parallel analyis is an alternative technique that compares the scree of factors of the observed data with that of a random data matrix of the same size as the original. 
+- **Parallel Analysis**: Parallel analyis is an alternative technique that compares the scree of factors of the observed data with that of a random data matrix of the same size as the original. <br>
+
+- Answer: Based on (a), I will retain 2 dimensions.<br>
 
 ```{r }
 # install.packages("psych")
@@ -72,20 +74,21 @@ abline(h=1, col="blue") # Kaiser eigenvalue-greater-than-one rule
 # sim=TRUE,quant=.95,cor="cor",use="pairwise",plot=TRUE,correct=.5)
 ```
 
-- Answer: Based on (a), I will retain 2 dimensions.
-
-# Question 2 Earlier, we examined the eigenvectors of the security dataset. Now, let’s examine factor loadings (use the principal() method from the psych package)
+# Question 2 Earlier, we examined the eigenvectors of the security dataset. Now, let’s examine factor loadings
 
 ## a. Looking at the loadings of the first 3 principal components, to which components does each item seem to best belong?
+
 ```{r }
 # install.packages("psych")
 library(psych)
 dec_pca3_orig <- principal(security_questions, nfactor=3, rotate="none", scores=TRUE)
 dec_pca3_orig$loadings
 ```
+
 - Answer: <br>
-  - Loadings, which include magnitude and direction are easier to interpret than eigenvectors. λ > 0.70 is considered a good loading, more than half of item variance explained by PC. <br>
-  - As a result, PC1 belongs to Q1, Q14, Q18. <br>
+  - Loadings, which include magnitude and direction are easier to interpret than eigenvectors. lambda > 0.70 is considered a good loading, more than half of item variance explained by PC. <br>
+  - As a result, PC1 belongs to Q1, Q14, Q18. <br><br>
+
 
 ## b. How much of the total variance of the security dataset do the first 3 PCs capture?
 ```{r }
@@ -108,10 +111,6 @@ dec_pca3_orig[3]
   - Q12 share similar loadings between PC1 and PC2.<br>
   - Q17 share similar loadings between PC1 and PC2.<br>
 
-```{r }
-dec_pca3_orig[3]
-```
-
 ## e. Can you distinguish a ‘meaning’ behind the first principal component from the items that load best upon it? (see the wording of the questions of those items)
 - Some infomation about site and positive meaning. <br>
 
@@ -120,8 +119,8 @@ dec_pca3_orig[3]
 ## a. Individually, does each rotated component (RC) explain the same, or different, amount of variance than the corresponding principal components (PCs)?
 - Answer: All are **different**. <br>
 ```{r }
-dec_pca3_rotate <- principal(security_questions, nfactor=3, rotate="nane", scores=TRUE)
-dec_pca3_rotate$loadings
+dec_pca3_original <- principal(security_questions, nfactor=3, rotate="none", scores=TRUE)
+dec_pca3_original$loadings
 ```
 
 ```{r }
@@ -155,4 +154,4 @@ dec_pca2_rotate$loadings
 ```
 
 ## (ungraded) Looking back at all our results and analyses of this dataset (from this week and previous), how many components (1-3) do you believe we should extract and analyze to understand the security dataset? Feel free to suggest different answers for different purposes.
-- Answer: **one**,the loading gap between PC1 and PC2 is quite large no matter which approach.
+- Answer: **one**, the loading gap between PC1 and PC2 is quite large no matter which approach.
