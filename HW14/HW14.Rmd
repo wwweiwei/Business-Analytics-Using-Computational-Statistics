@@ -8,6 +8,7 @@ output:
     latex_engine: xelatex
 bibliography: skeleton.bib
 link-citations: yes
+always_allow_html: yes
 ---
 
 # Question 1 Composite Path Models using PLS-PM
@@ -15,29 +16,40 @@ link-citations: yes
 ```{r }
 # install.packages("seminr")
 # install.packages("semPlot")
+# install.packages("DiagrammeR")
 library(seminr)
 library(semPlot)
+library(DiagrammeR)
 ```
 
 # a. Create a PLS path model using SEMinR, with all the following characteristics:
+```{r }
+sec = read.csv("security_data_sem.csv")
+# head(sec)
+```
+
 ## a-i. Measurement model – all constructs are measured as composites:
 
 1.Trust in website (TRUST): items TRST1 - TRST4 <br>
+
 2.Perceived security of website (SEC): items PSEC1 - PSEC4 <br>
+
 3.Reputation of website (REP): items PREP1 - PREP4 <br>
+
 4.Investment in website (INV): items PINV1 - PINV3 <br>
+
 5.Perception of privacy policies (POL): items PPSS1 - PPSS3 <br>
+
 6.Familiarity with website (FAML): item FAML1 <br>
+
 (see the documentation of SEMinR for making single item constructs) <br>
+
 7.Interaction between REP and POL (use orthogonalized product terms) <br>
 
 ## a-ii. Structural Model – paths between constructs as shown in this causal model: <br>
 REP + INV + POL + FAML + (REP✕POL) → SEC → TRUST <br>
 
 ```{r }
-sec = read.csv("security_data_sem.csv")
-head(sec)
-
 # a-i. Measurement Model
 sec_mm <- constructs(
   composite("TRUST", multi_items("TRST", 1:4)), ##1.
@@ -69,13 +81,15 @@ summary(sec_intxn_pls)
 
 # b. Show us the following results in table or figure formats:
 ## b-i. Plot a figure of the estimated model
-```{r }
+```{r fig.height = 4, fig.width = 6}
 plot(sec_intxn_pls)
 ```
+![The figure of the estimated model](/Users/nkust/Downloads/Business-Analytics-Using-Computational-Statistics-master-3/HW14/b-i_plot.png)
 
 ## b-ii. Weights and loadings of composites
 ```{r }
 summary(sec_intxn_pls)$weights
+summary(sec_intxn_pls)$loadings
 ```
 
 ## b-iii. Regression coefficients of paths between factors
@@ -94,7 +108,8 @@ summary(boot_pls)
 ## a-i. Either respecify all the constructs as being reflective(), or use the as.reflective() function to convert your earlier measurement model to being entirely reflective.
 ## a-ii. Use the same structural model as before (you can just reuse it again!)
 
-```{r }
+```{r } 
+## a-i. Measurement Model
 sec_cf_mm <- constructs(
   reflective("TRUST", multi_items("TRST", 1:4)), ##1.
   reflective("SEC", multi_items("PSEC", 1:4)), ##2.
@@ -105,6 +120,7 @@ sec_cf_mm <- constructs(
   interaction_term(iv="REP", moderator="POL", method=orthogonal) ##7.
 )
 
+## a-ii.
 sec_cf_pls <- estimate_cbsem( 
   data = sec,
   measurement_model = sec_cf_mm, 
@@ -117,13 +133,13 @@ summary(sec_cf_pls)
 
 # b. Show us the following results in table or figure formats
 ## b-i. Plot a figure of the estimated model (it will look different from your PLS model!)
-```{r }
+```{r fig.height = 4, fig.width = 6}
 plot(sec_cf_pls)
 ```
 
 ## b-ii. Loadings of composites
 ```{r }
-summary(sec_cf_pls)$weights
+summary(sec_cf_pls)$loadings
 ```
 
 ## b-iii. Regression coefficients of paths between factors, and their p-values
