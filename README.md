@@ -1,9 +1,9 @@
 # Business-Analytics-Using-Computational-Statistics
 
-> National Tsing Hua University Institute of Service Science
-> Business Analytics Using Computational Statistics (BACS)
-> Spring 2021
-> Instructor: Soumya Ray
+> National Tsing Hua University Institute of Service Science <br>
+> Business Analytics Using Computational Statistics (BACS) <br>
+> Spring 2021 <br>
+> Instructor: Soumya Ray <br>
 
 * HW1: Computation and Statistics
 * HW2: Description and Simulation
@@ -19,4 +19,3 @@
 * HW12: Composites and Components
 * HW13: PCA and Factors
 * HW14: Structural Equation Modeling
-* HW15: Performance and Style
